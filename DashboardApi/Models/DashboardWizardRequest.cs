@@ -7,7 +7,7 @@ namespace DashboardApi.Models
         public string? DashboardTitle { get; set; }
         public bool UseDefaults { get; set; }
         public TemplateVariables? Variables { get; set; }
-        public Dictionary<string, bool>? Panels { get; set; }
+        public Dictionary<string, object>? Panels { get; set; }
     }
 
     public class TemplateVariables

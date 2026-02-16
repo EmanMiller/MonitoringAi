@@ -1,6 +1,7 @@
 using DashboardApi.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -42,18 +43,24 @@ namespace DashboardApi.Services
                 throw new System.Exception("Failed to retrieve or parse Confluence page content.");
             }
 
-            // 2. Add new row to the table
+            // 2. Find tracking table and append new row (XHTML storage format); then increment version
             var storageValue = page.Body.Storage.Value;
             var xdoc = XDocument.Parse(storageValue);
             var table = xdoc.Descendants("table").FirstOrDefault();
 
             if (table != null)
             {
+                var tbody = table.Element("tbody") ?? table;
+                var linkCell = new XElement("td",
+                    new XElement("a",
+                        new XAttribute("href", dashboardUrl),
+                        new XAttribute("target", "_blank"),
+                        dashboardName));
                 var newRow = new XElement("tr",
-                                new XElement("td", projectName),
-                                new XElement("td", new XElement("a", new XAttribute("href", dashboardUrl), dashboardName)),
-                                new XElement("td", "Notes placeholder"));
-                table.Add(newRow);
+                    new XElement("td", projectName),
+                    linkCell,
+                    new XElement("td", "—"));
+                tbody.Add(newRow);
             }
 
             // 3. Update page with new content

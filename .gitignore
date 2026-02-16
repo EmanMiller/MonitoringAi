@@ -1,0 +1,14 @@
+# Environment and secrets (Dan loads .env locally only)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Dan coordination flags (local only, not committed)
+.dan-hold
+.dan-approved
+
+# Dan watcher runs from repo root; keep existing ignores in subprojects
+# (DashboardFrontend and DashboardApi have their own .gitignore)

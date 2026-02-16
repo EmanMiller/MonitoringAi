@@ -1,6 +1,8 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
+  const { user, logout } = useAuth();
   return (
     <header className="header">
       <div className="header-left">
@@ -14,8 +16,11 @@ const Header = () => {
         </div>
         <div className="user-info">
           <span>👤</span>
-          <span>Welcome, Employee</span>
+          <span>Welcome, {user?.userName ?? 'Employee'}</span>
         </div>
+        <button type="button" className="header-logout" onClick={logout} aria-label="Sign out">
+          Sign out
+        </button>
       </div>
     </header>
   );

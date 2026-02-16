@@ -47,12 +47,18 @@ namespace DashboardApi.Services
                 .Replace("{{domain_prefix}}", variables.DomainPrefix ?? "")
                 .Replace("{{domain}}", variables.Domain ?? "");
 
-            // Panel Generation
+            // Panel Generation - supports both default (bool true) and custom selection (bool false + _custom key)
             var panels = new List<Panel>();
             if (request.Panels != null)
             {
                 int yPos = 0;
-                if (request.Panels.GetValueOrDefault("Success Rate %", false))
+                var p = request.Panels;
+
+                bool GetDefault(string key) => p.TryGetValue(key, out var v) && v is bool b && b;
+                string? GetCustom(string key) => p.TryGetValue($"{key}_custom", out var v) ? v?.ToString() : null;
+
+                // Success Rate %
+                if (GetDefault("Success Rate %"))
                 {
                     panels.Add(new Panel {
                         Key = "success-rate-panel", PanelType = "SumoSearchPanel", Title = "Success Rate %",
@@ -60,16 +66,53 @@ namespace DashboardApi.Services
                         Layout = new Layout { X = 0, Y = yPos, Width = 6, Height = 8 }
                     });
                 }
-                if (request.Panels.GetValueOrDefault("Error Rate %", false))
+                else if (GetCustom("Success Rate %") is string s1)
+                {
+                    var title1 = s1; var q1 = finalQuery + "| success";
+                    if (s1 == "Request Success %") q1 = finalQuery + "| parse \"status=*\" | where status >= 200 and status < 300";
+                    else if (s1 == "Uptime %") q1 = finalQuery + "| count";
+                    panels.Add(new Panel { Key = "success-rate-panel", PanelType = "SumoSearchPanel", Title = title1, Queries = new List<Query> { new Query { QueryType = "Log", QueryText = q1, QueryKey = "A" } }, Layout = new Layout { X = 0, Y = yPos, Width = 6, Height = 8 } });
+                }
+
+                // Error Rate %
+                if (GetDefault("Error Rate %"))
                 {
                     panels.Add(new Panel {
                         Key = "error-rate-panel", PanelType = "SumoSearchPanel", Title = "Error Rate %",
                         Queries = new List<Query> { new Query { QueryType = "Log", QueryText = finalQuery + "| error", QueryKey = "A" } },
                         Layout = new Layout { X = 6, Y = yPos, Width = 6, Height = 8 }
                     });
-                    yPos += 8;
                 }
-                if (request.Panels.GetValueOrDefault("Past 7 day trend", false))
+                else if (GetCustom("Error Rate %") is string s2)
+                {
+                    var title2 = s2; var q2 = finalQuery + "| error";
+                    if (s2 == "4xx/5xx Rate") q2 = finalQuery + "| parse \"status=*\" | where status >= 400";
+                    else if (s2 == "Exception Count") q2 = finalQuery + "| _contentType=exception";
+                    panels.Add(new Panel { Key = "error-rate-panel", PanelType = "SumoSearchPanel", Title = title2, Queries = new List<Query> { new Query { QueryType = "Log", QueryText = q2, QueryKey = "A" } }, Layout = new Layout { X = 6, Y = yPos, Width = 6, Height = 8 } });
+                }
+                yPos += 8;
+
+                // Slow Queries
+                if (GetDefault("Slow Queries"))
+                {
+                    panels.Add(new Panel {
+                        Key = "slow-queries-panel", PanelType = "SumoSearchPanel", Title = "Slow Queries",
+                        Queries = new List<Query> { new Query { QueryType = "Log", QueryText = finalQuery + "| parse \"duration=*\" | where duration > 1000", QueryKey = "A" } },
+                        Layout = new Layout { X = 0, Y = yPos, Width = 6, Height = 8 }
+                    });
+                }
+                else if (GetCustom("Slow Queries") is string s3)
+                {
+                    var title3 = s3; var q3 = finalQuery + "| parse \"duration=*\" | where duration > 1000";
+                    if (s3 == "Query Response Time") q3 = finalQuery + "| parse \"response_time=*\" | where response_time > 500";
+                    else if (s3 == "Database Latency") q3 = finalQuery + "| _sourceCategory=*database* | parse \"latency=*\"";
+                    else if (s3 == "API Timeout Errors") q3 = finalQuery + "| parse \"timeout=*\" | where status >= 408";
+                    panels.Add(new Panel { Key = "slow-queries-panel", PanelType = "SumoSearchPanel", Title = title3, Queries = new List<Query> { new Query { QueryType = "Log", QueryText = q3, QueryKey = "A" } }, Layout = new Layout { X = 0, Y = yPos, Width = 6, Height = 8 } });
+                }
+                yPos += 8;
+
+                // Past 7 day trend
+                if (GetDefault("Past 7 day trend"))
                 {
                     panels.Add(new Panel {
                         Key = "trend-panel", PanelType = "SumoSearchPanel", Title = "Past 7 Day Trend",
@@ -77,8 +120,26 @@ namespace DashboardApi.Services
                         Layout = new Layout { X = 0, Y = yPos, Width = 12, Height = 8 }
                     });
                 }
+                else if (GetCustom("Past 7 day trend") is string s4)
+                {
+                    var title4 = s4; var q4 = finalQuery + "| timeslice 1d | count by _timeslice";
+                    if (s4 == "Week-over-Week Change") q4 = finalQuery + "| timeslice 1d | count by _timeslice | compare timeshift 7d";
+                    else if (s4 == "Rolling 7d Average") q4 = finalQuery + "| timeslice 1d | count | avg over 7";
+                    panels.Add(new Panel { Key = "trend-panel", PanelType = "SumoSearchPanel", Title = title4, Queries = new List<Query> { new Query { QueryType = "Log", QueryText = q4, QueryKey = "A" } }, Layout = new Layout { X = 0, Y = yPos, Width = 12, Height = 8 } });
+                }
             }
 
+            if (panels.Count == 0)
+            {
+                panels.Add(new Panel
+                {
+                    Key = "default-panel",
+                    PanelType = "SumoSearchPanel",
+                    Title = "Logs",
+                    Queries = new List<Query> { new Query { QueryType = "Log", QueryText = finalQuery, QueryKey = "A" } },
+                    Layout = new Layout { X = 0, Y = 0, Width = 12, Height = 8 }
+                });
+            }
 
             var dashboard = new SumoLogicDashboard
             {
@@ -106,7 +167,13 @@ namespace DashboardApi.Services
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var createdDashboard = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            return createdDashboard.url;
+            string? url = createdDashboard?.url?.ToString();
+            if (string.IsNullOrEmpty(url) && createdDashboard?.id != null)
+            {
+                var baseUrl = (sumoLogicApiUrl ?? "").Replace("/api", "");
+                url = $"{baseUrl}/app/dashboards#dashboard/{createdDashboard.id}";
+            }
+            return url ?? throw new System.InvalidOperationException("Sumo Logic did not return a dashboard URL.");
         }
 
 

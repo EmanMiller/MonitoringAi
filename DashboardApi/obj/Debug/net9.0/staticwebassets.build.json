@@ -1,12 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "wErO8vDDlkNXWpxsNrqkSCEZYFxhqPyHWyXDKXaNahQ=",
-  "Source": "DashboardApi",
-  "BasePath": "_content/DashboardApi",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
-}
+{"Version":1,"Hash":"VVYm5bsxDv/w/edpFcOiM+kb+5069ZGy93HwRofXCiU=","Source":"DashboardApi","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}

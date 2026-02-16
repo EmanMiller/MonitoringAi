@@ -1,0 +1,20 @@
+{
+  "name": "monitoring-ai",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MonitoringAi - Dashboard + API with Dan Git watcher",
+  "scripts": {
+    "dev": "npm run dev --prefix DashboardFrontend",
+    "watch:dan": "node dan-watcher.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run watch:dan\"",
+    "dan:push": "git push",
+    "dan:approved": "node -e \"require('fs').writeFileSync('.dan-approved', '')\"",
+    "dan:wait": "node -e \"require('fs').writeFileSync('.dan-hold', '')\"",
+    "dan:go": "node -e \"try { require('fs').unlinkSync('.dan-hold') } catch(e) {}\""
+  },
+  "devDependencies": {
+    "chokidar": "^3.5.3",
+    "concurrently": "^8.2.0",
+    "dotenv": "^16.3.1"
+  }
+}

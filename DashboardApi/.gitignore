@@ -1,0 +1,10 @@
+# Do not commit secrets
+.env
+.env.local
+appsettings.*.local
+# Use appsettings.Example.json as template; never commit real API keys
+# Database (optional: track or ignore)
+monitoring.db
+bin/
+obj/
+*.user
