@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "wErO8vDDlkNXWpxsNrqkSCEZYFxhqPyHWyXDKXaNahQ=",
+  "Source": "DashboardApi",
+  "BasePath": "_content/DashboardApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
