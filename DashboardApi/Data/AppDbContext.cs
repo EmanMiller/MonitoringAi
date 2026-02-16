@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<LogMapping> LogMappings => Set<LogMapping>();
     public DbSet<SavedQuery> SavedQueries => Set<SavedQuery>();
-    public DbSet<QueryLibraryItem> QueryLibrary => Set<QueryLibraryItem>();
+    public DbSet<Activity> Activities => Set<Activity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,15 +28,12 @@ public class AppDbContext : DbContext
             e.Property(x => x.Category).HasMaxLength(64);
             e.Property(x => x.Tags).HasMaxLength(1024);
         });
-        modelBuilder.Entity<QueryLibraryItem>(e =>
+        modelBuilder.Entity<Activity>(e =>
         {
             e.HasKey(x => x.Id);
-            e.Property(x => x.Category).HasMaxLength(128);
-            e.Property(x => x.Key).HasMaxLength(200);
-            e.Property(x => x.Value).HasMaxLength(16384);
-            e.Property(x => x.TagsJson).HasMaxLength(1024);
-            e.Property(x => x.CreatedBy).HasMaxLength(128);
-            e.Property(x => x.RoleRequired).HasMaxLength(32);
+            e.Property(x => x.Type).HasMaxLength(64);
+            e.Property(x => x.Description).HasMaxLength(512);
+            e.Property(x => x.UserId).HasMaxLength(128);
         });
         modelBuilder.Entity<User>(e =>
         {

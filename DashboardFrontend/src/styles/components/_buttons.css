@@ -1,0 +1,126 @@
+/**
+ * Buttons – Eclipsis ghost style
+ */
+
+.button-primary,
+.button-secondary {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.button-primary {
+  background: transparent;
+  border: 1px solid var(--color-border-accent);
+  color: var(--color-text-primary);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--color-border-accent);
+  color: var(--color-bg-primary);
+}
+
+.button-secondary {
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+}
+
+.button-secondary:hover {
+  color: var(--color-text-primary);
+}
+
+.btn-primary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-accent);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-border-accent);
+  color: var(--color-bg-primary);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-tertiary);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-normal);
+}
+
+.btn-secondary:hover {
+  color: var(--color-text-primary);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-2xl);
+  font-weight: 300;
+  cursor: pointer;
+  line-height: 1;
+  padding: var(--spacing-xs);
+  transition: color var(--transition-normal);
+}
+
+.close-button:hover {
+  color: var(--color-text-primary);
+}
+
+.header-logout {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-normal);
+}
+
+.header-logout:hover {
+  background: var(--color-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-accent);
+}
+
+.admin-back-btn,
+.header-back-link {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  padding: 0;
+  text-decoration: none;
+  transition: color var(--transition-normal);
+}
+
+.admin-back-btn:hover,
+.header-back-link:hover {
+  color: var(--color-text-primary);
+}
+
+.modal-footer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

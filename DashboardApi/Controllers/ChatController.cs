@@ -7,7 +7,6 @@ namespace DashboardApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class ChatController : ControllerBase
 {
     private readonly GeminiChatService _chatService;
@@ -25,16 +24,16 @@ public class ChatController : ControllerBase
     [HttpGet("status")]
     public IActionResult GetStatus()
     {
-        if (_chatService.IsConfigured())
-            return Ok(new { configured = true });
-        return StatusCode(503, new { configured = false, details = "Chat is not configured. Set Gemini:ApiKey on the server." });
+        var configured = _chatService.IsConfigured();
+        if (configured)
+            return Ok(new { configured = true, isConfigured = true });
+        return StatusCode(503, new { configured = false, isConfigured = false, details = "Chat is not configured. Set GEMINI_API_KEY or Gemini:ApiKey on the server." });
     }
 
     /// <summary>
     /// Send a message and get Gemini reply. History for context. Rate limit: 20/min per user.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "developer,senior_developer,admin")]
     public async Task<ActionResult<ChatResponse>> Post([FromBody] ChatRequest request)
     {
         var (valid, error) = InputValidationService.ValidateChatMessage(request?.Message);

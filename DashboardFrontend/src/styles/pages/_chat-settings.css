@@ -1,0 +1,24 @@
+/**
+ * Chat settings – Eclipsis style
+ */
+
+.chat-settings-field label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.chat-settings-actions { display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
+.chat-settings-error { color: var(--color-error); margin: 0; font-size: var(--font-size-sm); }
+.chat-settings-success { color: var(--color-success); margin: 0; font-size: var(--font-size-sm); }
+.chat-settings-hint { color: var(--color-text-tertiary); font-size: var(--font-size-xs); margin: 0; }
+.chat-settings-hint code {
+  background: var(--color-bg-tertiary);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.chat-settings-info { color: var(--color-text-primary); margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-sm); }
+.chat-settings-status { margin-top: var(--spacing-md); }

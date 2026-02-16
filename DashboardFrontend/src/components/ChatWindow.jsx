@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Message from './Message';
-import InputBar from './InputBar';
+import ChatInput from './Chat/ChatInput';
 import ChatSettingsModal from './ChatSettingsModal';
 import Toast from './Toast';
 import { getChatStatus, postChat } from '../services/api';
@@ -142,11 +142,9 @@ const ChatWindow = () => {
           </div>
         )}
       </div>
-      <InputBar
-        onSendMessage={handleSendMessage}
-        onUseSuggestedQuery={handleUseSuggestedQuery}
-        disabled={!chatAvailable}
-        loading={loading}
+      <ChatInput
+        onSend={handleSendMessage}
+        disabled={!chatAvailable || loading}
       />
       <ChatSettingsModal
         isOpen={settingsOpen}

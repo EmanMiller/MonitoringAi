@@ -7,16 +7,17 @@ namespace DashboardApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "developer,senior_developer,admin")]
 public class QueryController : ControllerBase
 {
     private readonly QueryAssistantService _queryAssistant;
     private readonly ChatRateLimitService _chatRateLimit;
+    private readonly IActivityService _activityService;
 
-    public QueryController(QueryAssistantService queryAssistant, ChatRateLimitService chatRateLimit)
+    public QueryController(QueryAssistantService queryAssistant, ChatRateLimitService chatRateLimit, IActivityService activityService)
     {
         _queryAssistant = queryAssistant;
         _chatRateLimit = chatRateLimit;
+        _activityService = activityService;
     }
 
     [HttpPost("ask")]
@@ -37,6 +38,8 @@ public class QueryController : ControllerBase
         try
         {
             var queryText = await _queryAssistant.GetSumoQueryAsync(sanitized);
+            var label = sanitized.Length > 50 ? sanitized[..47] + "..." : sanitized;
+            _activityService.LogActivity("query_run", $"Query '{label}' ran successfully", userId);
             return Ok(new QueryResponse { QueryText = queryText });
         }
         catch (Exception ex)

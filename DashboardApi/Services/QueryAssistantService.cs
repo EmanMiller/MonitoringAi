@@ -23,21 +23,22 @@ public class QueryAssistantService
 
     public async Task<string> GetSumoQueryAsync(string userMessage, CancellationToken cancellationToken = default)
     {
-        var apiKey = _configuration["Gemini:ApiKey"];
+        var apiKey = _configuration["GEMINI_API_KEY"] ?? _configuration["Gemini:ApiKey"];
+        var trimmed = apiKey?.Trim();
+        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
         var model = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
-        if (string.IsNullOrEmpty(apiKey))
-            throw new InvalidOperationException("Gemini:ApiKey is not configured.");
 
         List<LogMapping> mappings;
         using (var scope = _scopeFactory.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             mappings = await db.LogMappings.Where(x => x.IsActive).ToListAsync(cancellationToken);
         }
 
         var systemInstruction = BuildSystemPrompt(mappings);
 
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={trimmed}";
         var body = new
         {
             systemInstruction = new

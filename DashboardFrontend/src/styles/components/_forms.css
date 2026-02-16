@@ -1,0 +1,143 @@
+/**
+ * Forms – Eclipsis style
+ * Black background, white border, white text, focus glow
+ */
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+  font-family: inherit;
+}
+
+.ql-input,
+.ql-form-card select,
+input.form-input,
+textarea.form-input,
+select.form-input {
+  min-height: 44px;
+  padding: 12px 16px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  box-sizing: border-box;
+  transition: box-shadow var(--transition-normal);
+}
+
+.ql-input::placeholder,
+input.form-input::placeholder,
+textarea.form-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.ql-input:focus,
+.ql-form-card select:focus,
+input.form-input:focus,
+textarea.form-input:focus,
+select.form-input:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+textarea.form-input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.api-key-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-sm);
+}
+
+.api-key-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  padding: 12px 8px;
+  font-size: var(--font-size-base);
+  min-height: 44px;
+}
+
+.api-key-input:focus {
+  outline: none;
+}
+
+.api-key-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-normal);
+}
+
+.api-key-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.toggle-switch input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.toggle-switch label {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 40px;
+  height: 24px;
+  background: var(--color-bg-tertiary);
+  display: block;
+  border-radius: var(--radius-full);
+  position: relative;
+  margin: 0;
+}
+
+.toggle-switch label:after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  transition: var(--transition-normal);
+}
+
+.toggle-switch input:checked + label {
+  background: var(--color-border-accent);
+}
+
+.toggle-switch input:checked + label:after {
+  left: calc(100% - 2px);
+  transform: translateX(-100%);
+  background: var(--color-bg-primary);
+}
+
+.toggle-label {
+  margin-left: var(--spacing-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}

@@ -8,14 +8,13 @@ namespace DashboardApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "senior_developer,admin")]
 public class LogMappingsController : ControllerBase
 {
     private static readonly HashSet<string> AllowedCategories = new(StringComparer.OrdinalIgnoreCase) { "Environment", "Intent" };
 
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
 
-    public LogMappingsController(AppDbContext db) => _db = db;
+    public LogMappingsController(ApplicationDbContext db) => _db = db;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LogMapping>>> GetAll()

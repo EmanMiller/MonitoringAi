@@ -1,0 +1,82 @@
+/**
+ * Modals – Eclipsis style
+ * Pure black, thin white borders
+ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-overlay.wizard-overlay {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.modal-content,
+.quick-query-modal {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  width: 90%;
+  max-width: 560px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-query-modal {
+  max-width: 520px;
+}
+
+.modal-header {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-thin);
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+  flex-grow: 1;
+}
+
+.modal-footer {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+.chat-settings-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.quick-query-overlay {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.quick-query-body {
+  padding: var(--spacing-xl);
+}
+
+.token-expiry-overlay { z-index: 9999; }
+.token-expiry-modal { max-width: 400px; }
+.token-expiry-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; margin-top: var(--spacing-md); }

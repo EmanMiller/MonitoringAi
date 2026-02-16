@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import Header from './Header';
 import {
   getAllQueryLibrary,
   searchQueryLibrary,
@@ -95,7 +95,6 @@ function QueryCard({ query, searchTerm, onCopy, onViewFull }) {
 }
 
 function CommonQAPage() {
-  const navigate = useNavigate();
   const [allQueries, setAllQueries] = useState([]);
   const [popularQueries, setPopularQueries] = useState([]); // first 5 from library
   const [searchInput, setSearchInput] = useState('');
@@ -209,14 +208,7 @@ function CommonQAPage() {
 
   return (
     <div className="app-container common-qa-container">
-      <header className="header">
-        <div className="header-left">
-          <button type="button" className="admin-back-btn" onClick={() => navigate('/')}>
-            ← Back
-          </button>
-          <h2>Common Q&A</h2>
-        </div>
-      </header>
+      <Header backTo="/" backLabel="Back to Dashboard" />
 
       <main className="common-qa-main" onKeyDown={handleKeyDown}>
         <section className="common-qa-hero">
@@ -365,7 +357,7 @@ function CommonQAPage() {
                 })}
               </div>
               {CATEGORY_ORDER.every((c) => (byCategory[c]?.length ?? 0) === 0) && allQueries.length === 0 && (
-                <p className="common-qa-empty-inline">No queries in the library yet. Add them from Admin.</p>
+                <p className="common-qa-empty-inline">No queries in the library yet. Contact your administrator to add queries.</p>
               )}
             </section>
           </>

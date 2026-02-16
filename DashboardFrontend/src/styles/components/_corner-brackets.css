@@ -1,0 +1,85 @@
+/**
+ * Eclipsis corner brackets – signature card style
+ */
+
+.corner-brackets {
+  position: relative;
+}
+
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--color-border-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.corner-brackets::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-brackets::after {
+  top: 0;
+  right: 0;
+  left: auto;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-brackets .corner-brackets__bottom-left,
+.corner-brackets .corner-brackets__bottom-right {
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--color-border-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.corner-brackets .corner-brackets__bottom-left {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-brackets .corner-brackets__bottom-right {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Simpler approach: use wrapper with pseudo on inner for bottom corners */
+.corner-brackets-inner {
+  position: relative;
+}
+
+.corner-brackets-inner::before,
+.corner-brackets-inner::after {
+  content: '';
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--color-border-accent);
+  pointer-events: none;
+  bottom: 0;
+}
+
+.corner-brackets-inner::before {
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-brackets-inner::after {
+  right: 0;
+  border-left: none;
+  border-top: none;
+}

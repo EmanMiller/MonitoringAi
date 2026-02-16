@@ -1,99 +1,54 @@
-using System.Text;
-using DashboardApi.Data;
-using DashboardApi.Middleware;
-using DashboardApi.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using System.Text.RegularExpressions;
+using DashboardApi.Configuration;
+
+// Load .env from project or repo root so GEMINI_API_KEY etc. are available
+LoadEnvFile();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(o =>
-{
-    o.Filters.Add<DashboardApi.Filters.LogPermissionDenialFilter>();
-});
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=monitoring.db"));
-builder.Services.AddHttpClient<DashboardService>();
-builder.Services.AddHttpClient<ConfluenceService>();
-builder.Services.AddHttpClient<QueryAssistantService>();
-builder.Services.AddHttpClient<GeminiChatService>();
-builder.Services.AddScoped<DashboardService>();
-builder.Services.AddScoped<ConfluenceService>();
-
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is required.");
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "SumoLogic.DashboardApi",
-            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "SumoLogic.DashboardFrontend",
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(1)
-        };
-    });
-builder.Services.AddAuthorization();
-builder.Services.AddAntiforgery(o => o.HeaderName = "X-CSRF-TOKEN");
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ChatRateLimitService>();
-builder.Services.AddScoped<DashboardApi.Filters.LogPermissionDenialFilter>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowViteApp", policy =>
-    {
-        policy.WithOrigins(builder.Configuration["Cors:Origins"] ?? "http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
+// Configuration and services
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddCorsPolicy(builder.Configuration);
+builder.Services.AddSecurityServices();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-    if (!await db.Users.AnyAsync())
-    {
-        var defaultPassword = builder.Configuration["Seed:DefaultAdminPassword"];
-        if (!string.IsNullOrEmpty(defaultPassword))
-        {
-            db.Users.Add(new User
-            {
-                UserName = "admin",
-                PasswordHash = PasswordValidator.HashPassword(defaultPassword),
-                Role = "admin"
-            });
-            await db.SaveChangesAsync();
-        }
-    }
-}
+await app.EnsureCreatedAndSeedAsync();
 
 app.UseHttpsRedirection();
-app.UseCors("AllowViteApp");
-app.UseMiddleware<LoginRateLimitMiddleware>();
-app.UseMiddleware<JwtCookieMiddleware>();
+app.UseCors(CorsConfiguration.PolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("Content-Security-Policy",
-        "default-src 'self'; " +
-        "connect-src 'self' http://localhost:* https://localhost:* https://generativelanguage.googleapis.com; " +
-        "script-src 'self' 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline';");
-    await next();
-});
-
+app.UseSecurityHeaders();
 app.MapControllers();
 
 app.Run();
+
+static void LoadEnvFile()
+{
+    var dir = Directory.GetCurrentDirectory();
+    var candidates = new[] { Path.Combine(dir, ".env"), Path.Combine(dir, "..", ".env"), Path.Combine(dir, "..", "..", ".env") };
+    foreach (var path in candidates)
+    {
+        var full = Path.GetFullPath(path);
+        if (!File.Exists(full)) continue;
+        foreach (var line in File.ReadLines(full))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length == 0 || trimmed[0] == '#') continue;
+            var match = Regex.Match(trimmed, @"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$");
+            if (match.Success)
+            {
+                var key = match.Groups[1].Value;
+                var value = match.Groups[2].Value.Trim();
+                if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+                    value = value[1..^1].Replace("\\\"", "\"");
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                    Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+            }
+        }
+        break;
+    }
+}

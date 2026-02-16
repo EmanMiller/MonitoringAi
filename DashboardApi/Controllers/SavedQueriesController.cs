@@ -8,7 +8,6 @@ namespace DashboardApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "developer,senior_developer,admin")]
 public class SavedQueriesController : ControllerBase
 {
     private static readonly HashSet<string> AllowedCategories = new(StringComparer.OrdinalIgnoreCase)
@@ -16,9 +15,9 @@ public class SavedQueriesController : ControllerBase
         "Browse Product", "Browse Path", "Account", "Checkout", "Gift Registry", "API", "Environment", "Intent"
     };
 
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
 
-    public SavedQueriesController(AppDbContext db) => _db = db;
+    public SavedQueriesController(ApplicationDbContext db) => _db = db;
 
     /// <summary>Search across Name (Key) and Tags with fuzzy word matching. Debounce on client (300ms).</summary>
     [HttpGet("search")]
@@ -88,7 +87,6 @@ public class SavedQueriesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "senior_developer,admin")]
     public async Task<ActionResult<SavedQuery>> Create([FromBody] SavedQueryDto dto)
     {
         var (validKey, errKey) = InputValidationService.ValidateQueryLibraryKey(dto?.Name);
@@ -111,7 +109,6 @@ public class SavedQueriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "senior_developer,admin")]
     public async Task<ActionResult<SavedQuery>> Update(int id, [FromBody] SavedQueryDto dto)
     {
         var (validKey, errKey) = InputValidationService.ValidateQueryLibraryKey(dto?.Name);
@@ -130,7 +127,6 @@ public class SavedQueriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "senior_developer,admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var entity = await _db.SavedQueries.FindAsync(id);

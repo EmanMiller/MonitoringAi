@@ -8,21 +8,23 @@ namespace DashboardApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Roles = "developer,senior_developer,admin")]
     public class DashboardController : ControllerBase
     {
         private readonly DashboardService _dashboardService;
         private readonly ConfluenceService _confluenceService;
-        private readonly IConfiguration _configuration; // Add this
+        private readonly IConfiguration _configuration;
+        private readonly IActivityService _activityService;
 
         public DashboardController(
-            DashboardService dashboardService, 
-            ConfluenceService confluenceService, 
-            IConfiguration configuration) // Add this
+            DashboardService dashboardService,
+            ConfluenceService confluenceService,
+            IConfiguration configuration,
+            IActivityService activityService)
         {
             _dashboardService = dashboardService;
             _confluenceService = confluenceService;
-            _configuration = configuration; // Add this
+            _configuration = configuration;
+            _activityService = activityService;
         }
 
         [HttpPost]
@@ -38,6 +40,8 @@ namespace DashboardApi.Controllers
 
                 var dashboardUrl = await _dashboardService.CreateDashboardAsync(dashboardName, request.SourceCategory);
                 await _confluenceService.UpdatePageAsync(request.ConfluencePageId, dashboardUrl, request.DashboardName, request.ProjectName);
+                _activityService.LogActivity("dashboard_update", $"Dashboard '{dashboardName}' created");
+                _activityService.LogActivity("confluence_created", $"New Confluence page: '{request.DashboardName}'");
                 return Ok(new { dashboardUrl });
             }
             catch (System.Exception)
@@ -71,6 +75,8 @@ namespace DashboardApi.Controllers
 
                 var projectName = "Project From Wizard";
                 await _confluenceService.UpdatePageAsync(confluencePageId, dashboardUrl, dashboardTitle, projectName);
+                _activityService.LogActivity("dashboard_update", $"Dashboard '{dashboardTitle}' updated");
+                _activityService.LogActivity("confluence_created", $"New Confluence page: '{dashboardTitle}'");
 
                 return Ok(new { dashboardUrl });
             }

@@ -1,0 +1,114 @@
+/**
+ * Admin – Eclipsis style
+ */
+
+.main-content-admin {
+  padding: var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--color-bg-primary);
+}
+
+.admin-panel { width: 100%; max-width: 1200px; margin: 0 auto; }
+
+.admin-tabs { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
+
+.admin-tab {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color var(--transition-normal), border-color var(--transition-normal);
+}
+
+.admin-tab:hover { color: var(--color-text-primary); }
+.admin-tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-border-accent); }
+
+.admin-tab-content {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-xl);
+}
+
+.admin-view {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-2xl);
+}
+
+.admin-header { margin-bottom: var(--spacing-xl); }
+.admin-header h1 { font-size: var(--font-size-xl); font-weight: var(--font-weight-thin); margin: 0 0 var(--spacing-sm) 0; }
+.admin-subtitle { color: var(--color-text-secondary); margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-sm); }
+.admin-actions { margin-bottom: var(--spacing-md); }
+
+.admin-toast {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-success);
+  color: var(--color-text-primary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  font-weight: var(--font-weight-medium);
+  animation: fadeIn 0.2s ease;
+}
+
+.admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.admin-field { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+.admin-field-full { grid-column: 1 / -1; }
+.admin-field label { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.admin-field input,
+.admin-field select {
+  min-height: 44px;
+  padding: 12px 16px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.admin-field input:focus,
+.admin-field select:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.admin-form-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; }
+
+.admin-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); }
+.admin-table { width: 100%; border-collapse: collapse; background: var(--color-bg-secondary); }
+.admin-table th, .admin-table td { padding: var(--spacing-md) var(--spacing-lg); text-align: left; border-bottom: 1px solid var(--color-border); }
+.admin-table th { background: var(--color-bg-tertiary); color: var(--color-text-secondary); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm); }
+.admin-table tbody tr:hover { background: var(--color-hover); }
+.admin-th-actions, .admin-actions-cell { width: 140px; text-align: right; }
+.admin-value-cell {
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  border: 1px solid var(--color-border);
+}
+
+.admin-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
+  margin-left: var(--spacing-sm);
+  transition: all var(--transition-normal);
+}
+
+.admin-btn-edit:hover { border-color: var(--color-border-accent); background: var(--color-hover); }
+.admin-btn-delete { border-color: var(--color-error); color: var(--color-error); }
+.admin-btn-delete:hover { background: var(--color-error-muted); }
+
+.admin-empty { color: var(--color-text-tertiary); font-style: italic; padding: var(--spacing-xl); }
+.admin-loading { color: var(--color-text-secondary); padding: var(--spacing-xl); }

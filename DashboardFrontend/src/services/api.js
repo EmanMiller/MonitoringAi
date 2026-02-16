@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:7290';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5160';
 
 let csrfTokenPromise = null;
 async function getCsrfToken() {
@@ -123,6 +123,11 @@ export const getPopularQueries = async (top = 5) => {
 
 export const incrementQueryUsage = async (id) => {
   await api.post(`/api/QueryLibrary/${id}/use`);
+};
+
+export const getRecentActivity = async (count = 10) => {
+  const { data } = await api.get('/api/activity/recent', { params: { count } });
+  return data;
 };
 
 export const askQuery = async (message) => {

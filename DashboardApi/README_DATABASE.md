@@ -1,38 +1,82 @@
-# DashboardApi – SQLite database (local)
+# DashboardApi – Database setup
 
-The API uses **SQLite** (file-based). There is **no separate database server** to start.
+The API uses **Entity Framework Core** with either **SQLite** (local/dev) or **PostgreSQL** (production/cloud).
 
-## First-time / "no such table: Users" fix
+## Connection
 
-If you see `SQLite Error 1: no such table: Users`, the database file exists but has no (or old) tables. Remove it and start the API again so it can create a fresh DB with the correct schema.
+- **Default (SQLite):** `ConnectionStrings:DefaultConnection` = `Data Source=monitoring.db` — no server required.
+- **PostgreSQL:** Set `ConnectionStrings:DefaultConnection` to a Postgres connection string, e.g.  
+  `Host=localhost;Database=monitoringai;Username=postgres;Password=your_password;Include Error Detail=true`  
+  Or set **DATABASE_URL** (e.g. from env/Secrets Manager):  
+  `postgresql://user:password@host:5432/dbname`
 
-From the repo root:
+The app detects PostgreSQL when the connection string contains `Host=` or `Database=` (or starts with `postgresql://`).
+
+## Schema (ApplicationDbContext)
+
+| Table         | Purpose |
+|--------------|---------|
+| Users        | Id (Guid), Username, Email, PasswordHash, CreatedAt, Role, RefreshToken, lockout |
+| Dashboards   | Id (Guid), Name (50), UserId, Configuration (JSON), CreatedAt, UpdatedAt |
+| Queries      | Id (Guid), Category, Key (200), Value (text), Tags (JSON), CreatedBy, CreatedAt |
+| Activities   | Id (Guid), Type, Description, UserId (nullable), Timestamp, Metadata (JSON) |
+| ChatHistory  | Id (Guid), UserId, ConversationId, Role, Content (text), Timestamp |
+| LogMappings  | Existing: Category, Key, Value (log mapping for query assistant) |
+| SavedQueries | Existing: Name, QueryText, Category, Tags, UsageCount |
+
+## First-time / local (SQLite)
+
+If you see `no such table` or want a clean DB:
 
 ```bash
-# Remove the SQLite file (if it exists)
 rm -f MonitoringAi/DashboardApi/monitoring.db
-
-# Start the API (creates monitoring.db and all tables on first run)
 cd MonitoringAi/DashboardApi
 dotnet run
 ```
 
-On Windows (PowerShell):
+On first run, if there are **no pending migrations**, the app calls `EnsureCreatedAsync()` and creates all tables. Seed data (sample activities) and optional admin user are applied when the `Users` table is empty.
 
-```powershell
-Remove-Item -Force MonitoringAi\DashboardApi\monitoring.db -ErrorAction SilentlyContinue
-cd MonitoringAi\DashboardApi
-dotnet run
+## Migrations (recommended for production)
+
+Install the EF Core tools (once):
+
+```bash
+dotnet tool install --global dotnet-ef
 ```
 
-The first time the app runs after deleting the file, `EnsureCreated()` will create `monitoring.db` and the `Users`, `LogMappings`, `SavedQueries`, and `QueryLibraryItem` tables.
+Create and apply migrations:
+
+```bash
+cd MonitoringAi/DashboardApi
+dotnet ef migrations add InitialCreate --context ApplicationDbContext
+dotnet ef database update
+```
+
+After that, startup uses **MigrateAsync()** so each run applies any pending migrations.
 
 ## Optional: seed admin user
 
-To create a default admin user, set in `appsettings.Development.json` (or environment):
+In `appsettings.Development.json` (or environment):
 
 ```json
 "Seed": { "DefaultAdminPassword": "YourSecurePassword" }
 ```
 
-Then restart the API. If the `Users` table is empty, it will create an `admin` user with that password.
+If the `Users` table is empty on startup, an `admin` user is created with that password (Username: `admin`, Email: `admin@local`).
+
+## Security (for @Paul)
+
+- Connection string: from **Configuration** (appsettings or env); use **Secrets Manager** in production (e.g. AWS Secrets Manager / GCP Secret Manager).
+- Do **not** hardcode credentials.
+- Prefer **SSL/TLS** for Postgres in production; disable **public access** to the DB (VPC/firewall).
+- Use IAM roles (AWS) or service accounts (GCP) where possible; principle of least privilege for DB users.
+
+## For @Gary
+
+Database is configured; connection string is in **appsettings.json** (and optional **Postgres** entry). Services use **ApplicationDbContext**. To apply migrations, run:
+
+```bash
+dotnet ef database update
+```
+
+(from the DashboardApi directory, with `dotnet-ef` tool installed).

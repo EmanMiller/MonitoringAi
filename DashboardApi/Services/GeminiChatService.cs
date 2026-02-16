@@ -21,10 +21,10 @@ public class GeminiChatService
     /// </summary>
     public async Task<string> SendChatAsync(string message, IReadOnlyList<ChatTurn> history, CancellationToken cancellationToken = default)
     {
-        var apiKey = _configuration["Gemini:ApiKey"];
+        var apiKey = GetApiKey();
         var modelName = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
         if (string.IsNullOrEmpty(apiKey))
-            throw new InvalidOperationException("Gemini:ApiKey is not configured.");
+            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
 
         var contents = new List<object>();
         foreach (var turn in history)
@@ -74,8 +74,20 @@ public class GeminiChatService
     /// </summary>
     public bool IsConfigured()
     {
-        var apiKey = _configuration["Gemini:ApiKey"];
+        var apiKey = GetApiKey();
         return !string.IsNullOrWhiteSpace(apiKey);
+    }
+
+    /// <summary>
+    /// Read API key from GEMINI_API_KEY (env) or Gemini:ApiKey (appsettings). Never log or expose.
+    /// </summary>
+    private string? GetApiKey()
+    {
+        var key = _configuration["GEMINI_API_KEY"] ?? _configuration["Gemini:ApiKey"];
+        var trimmed = key?.Trim();
+        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase))
+            return null;
+        return trimmed;
     }
 }
 

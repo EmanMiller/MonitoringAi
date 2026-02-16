@@ -11,13 +11,13 @@ namespace DashboardApi.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly JwtSettings _jwt;
     private readonly ILogger<AuthService> _logger;
     private const int LoginLockoutMinutes = 15;
     private const int MaxFailedAttempts = 5;
 
-    public AuthService(AppDbContext db, IOptions<JwtSettings> jwt, ILogger<AuthService> logger)
+    public AuthService(ApplicationDbContext db, IOptions<JwtSettings> jwt, ILogger<AuthService> logger)
     {
         _db = db;
         _jwt = jwt.Value;
@@ -26,7 +26,7 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, UserInfo? User, string? Error)> ValidateLoginAsync(string userName, string password, CancellationToken ct = default)
     {
-        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserName == userName, ct);
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == userName, ct);
         if (user == null)
             return (false, null, "Invalid credentials.");
 
@@ -40,16 +40,16 @@ public class AuthService : IAuthService
         }
 
         await RecordSuccessfulLoginInternalAsync(user.Id, ct);
-        return (true, new UserInfo { Id = user.Id, UserName = user.UserName, Role = user.Role }, null);
+        return (true, new UserInfo { Id = user.Id, UserName = user.Username, Role = user.Role }, null);
     }
 
-    public async Task<(string? AccessToken, string? RefreshToken, DateTime? RefreshExpiry)> IssueTokensAsync(int userId, string userName, string role, CancellationToken ct = default)
+    public async Task<(string? AccessToken, string? RefreshToken, DateTime? RefreshExpiry)> IssueTokensAsync(Guid userId, string userName, string role, CancellationToken ct = default)
     {
         var accessToken = GenerateAccessToken(userId, userName, role);
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var refreshExpiry = DateTime.UtcNow.AddDays(7);
 
-        var user = await _db.Users.FindAsync(new object[] { userId }, ct);
+        var user = await _db.Users.FindAsync([userId], ct);
         if (user != null)
         {
             user.RefreshToken = refreshToken;
@@ -65,12 +65,12 @@ public class AuthService : IAuthService
         var user = await _db.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, ct);
         if (user == null || user.RefreshTokenExpiryUtc == null || user.RefreshTokenExpiryUtc < DateTime.UtcNow)
             return (false, null);
-        return (true, new UserInfo { Id = user.Id, UserName = user.UserName, Role = user.Role });
+        return (true, new UserInfo { Id = user.Id, UserName = user.Username, Role = user.Role });
     }
 
-    public async Task RevokeRefreshTokenAsync(int userId, CancellationToken ct = default)
+    public async Task RevokeRefreshTokenAsync(Guid userId, CancellationToken ct = default)
     {
-        var user = await _db.Users.FindAsync(new object[] { userId }, ct);
+        var user = await _db.Users.FindAsync([userId], ct);
         if (user != null)
         {
             user.RefreshToken = null;
@@ -79,12 +79,12 @@ public class AuthService : IAuthService
         }
     }
 
-    public void RecordFailedLogin(int userId) => _ = RecordFailedLoginInternalAsync(userId, default);
-    public void RecordSuccessfulLogin(int userId) => _ = RecordSuccessfulLoginInternalAsync(userId, default);
+    public void RecordFailedLogin(Guid userId) => _ = RecordFailedLoginInternalAsync(userId, default);
+    public void RecordSuccessfulLogin(Guid userId) => _ = RecordSuccessfulLoginInternalAsync(userId, default);
 
-    private async Task RecordFailedLoginInternalAsync(int userId, CancellationToken ct)
+    private async Task RecordFailedLoginInternalAsync(Guid userId, CancellationToken ct)
     {
-        var user = await _db.Users.FindAsync(new object[] { userId }, ct);
+        var user = await _db.Users.FindAsync([userId], ct);
         if (user == null) return;
         user.FailedLoginAttempts++;
         if (user.FailedLoginAttempts >= MaxFailedAttempts)
@@ -92,16 +92,16 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync(ct);
     }
 
-    private async Task RecordSuccessfulLoginInternalAsync(int userId, CancellationToken ct)
+    private async Task RecordSuccessfulLoginInternalAsync(Guid userId, CancellationToken ct)
     {
-        var user = await _db.Users.FindAsync(new object[] { userId }, ct);
+        var user = await _db.Users.FindAsync([userId], ct);
         if (user == null) return;
         user.FailedLoginAttempts = 0;
         user.LockoutEndUtc = null;
         await _db.SaveChangesAsync(ct);
     }
 
-    private string GenerateAccessToken(int userId, string userName, string role)
+    private string GenerateAccessToken(Guid userId, string userName, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

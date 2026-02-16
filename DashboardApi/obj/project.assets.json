@@ -687,6 +687,37 @@
           }
         }
       },
+      "Npgsql/9.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Npgsql.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Npgsql.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Npgsql.EntityFrameworkCore.PostgreSQL/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "[9.0.0, 10.0.0)",
+          "Microsoft.EntityFrameworkCore.Relational": "[9.0.0, 10.0.0)",
+          "Npgsql": "9.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.10": {
         "type": "package",
         "dependencies": {
@@ -2380,6 +2411,38 @@
         "packageIcon.png"
       ]
     },
+    "Npgsql/9.0.0": {
+      "sha512": "zu1nCRt0gWP/GR0reYgg0Bl5o8qyNV7mVAgzAbVLRiAd1CYXcf/9nrubPH0mt93u8iGTKmYqWaLVECEAcE6IfQ==",
+      "type": "package",
+      "path": "npgsql/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net6.0/Npgsql.dll",
+        "lib/net6.0/Npgsql.xml",
+        "lib/net8.0/Npgsql.dll",
+        "lib/net8.0/Npgsql.xml",
+        "npgsql.9.0.0.nupkg.sha512",
+        "npgsql.nuspec",
+        "postgresql.png"
+      ]
+    },
+    "Npgsql.EntityFrameworkCore.PostgreSQL/9.0.0": {
+      "sha512": "ObngKFRLMBAeMqQzK7SC0Q6WZtWw0imPmEkVPo12yLVF3fioz2TN+w0mhNMJ5cVd/sLB2u+jei0bmA9sDMtkMw==",
+      "type": "package",
+      "path": "npgsql.entityframeworkcore.postgresql/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll",
+        "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.xml",
+        "npgsql.entityframeworkcore.postgresql.9.0.0.nupkg.sha512",
+        "npgsql.entityframeworkcore.postgresql.nuspec",
+        "postgresql.png"
+      ]
+    },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.10": {
       "sha512": "UxWuisvZ3uVcVOLJQv7urM/JiQH+v3TmaJc1BLKl5Dxfm/nTzTUrqswCqg/INiYLi61AXnHo1M1JPmPqqLnAdg==",
       "type": "package",
@@ -2683,11 +2746,12 @@
       "Microsoft.AspNetCore.OpenApi >= 9.0.1",
       "Microsoft.EntityFrameworkCore.Design >= 9.0.0",
       "Microsoft.EntityFrameworkCore.Sqlite >= 9.0.0",
-      "Newtonsoft.Json >= 13.0.4"
+      "Newtonsoft.Json >= 13.0.4",
+      "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.0"
     ]
   },
   "packageFolders": {
-    "/var/folders/sx/_jh68tbd4nq14k56f1nkc3b00000gn/T/cursor-sandbox-cache/53c3ebc64d00a24e88e30a62b51448a4/nuget": {}
+    "/Users/emmanuelmiller/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
@@ -2695,7 +2759,7 @@
       "projectUniqueName": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/DashboardApi.csproj",
       "projectName": "DashboardApi",
       "projectPath": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/DashboardApi.csproj",
-      "packagesPath": "/var/folders/sx/_jh68tbd4nq14k56f1nkc3b00000gn/T/cursor-sandbox-cache/53c3ebc64d00a24e88e30a62b51448a4/nuget",
+      "packagesPath": "/Users/emmanuelmiller/.nuget/packages/",
       "outputPath": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
@@ -2754,6 +2818,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.4, )"
+          },
+          "Npgsql.EntityFrameworkCore.PostgreSQL": {
+            "target": "Package",
+            "version": "[9.0.0, )"
           }
         },
         "imports": [

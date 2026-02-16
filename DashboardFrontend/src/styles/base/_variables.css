@@ -1,0 +1,98 @@
+/**
+ * MonitoringAI Design System – Eclipsis Aesthetic
+ * Pure black, minimal, modern like ChatGPT
+ */
+
+:root {
+  /* === Backgrounds === */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-elevated: #242424;
+  --color-bg-input: #0a0a0a;
+
+  /* === Text === */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-tertiary: #6a6a6a;
+  --color-text-muted: #6a6a6a;
+
+  /* === Borders & Accents === */
+  --color-border: #2a2a2a;
+  --color-border-subtle: #1a1a1a;
+  --color-border-accent: #ffffff;
+  --color-hover: rgba(255, 255, 255, 0.05);
+
+  /* Primary (ghost/invert style) */
+  --color-primary: #ffffff;
+  --color-primary-hover: #ffffff;
+  --color-primary-muted: rgba(255, 255, 255, 0.1);
+
+  /* User/AI message distinction (ChatGPT) */
+  --color-user-bubble: #1a1a1a;
+  --color-assistant-bubble: #2a2a2a;
+  --color-system-bubble: #1a1a1a;
+
+  /* === Semantic (minimal use) === */
+  --color-success: #10b981;
+  --color-success-muted: rgba(16, 185, 129, 0.2);
+  --color-error: #ef4444;
+  --color-error-muted: rgba(239, 68, 68, 0.2);
+  --color-warning: #f59e0b;
+  --color-warning-muted: rgba(245, 158, 11, 0.2);
+
+  /* === Spacing (generous like ChatGPT) === */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-2xl: 64px;
+  --spacing-3xl: 96px;
+
+  /* === Typography (clean like ChatGPT) === */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-family-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-3xl: 48px;
+
+  --font-weight-thin: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* === Border radius === */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* === Corner brackets (Eclipsis) === */
+  --bracket-size: 20px;
+  --bracket-thickness: 1px;
+
+  /* === Shadows (subtle) === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.9);
+  --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+  --shadow-focus: 0 0 0 2px rgba(255, 255, 255, 0.3);
+
+  /* === Transitions === */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}

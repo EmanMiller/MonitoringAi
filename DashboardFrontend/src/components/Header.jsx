@@ -1,13 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Header = () => {
+const Header = ({ backTo, backLabel = 'Back to Dashboard' }) => {
   const { user, logout } = useAuth();
   return (
     <header className="header">
       <div className="header-left">
+        {backTo && (
+          <Link to={backTo} className="header-back-link">
+            ← {backLabel}
+          </Link>
+        )}
         <h2>Crate&Barrel</h2>
-        <span>Quick Dashboard, Querries, & Confluence</span>
+        <span>Quick Dashboard, Queries, & Confluence</span>
       </div>
       <div className="header-right">
         <div className="secure-connection">

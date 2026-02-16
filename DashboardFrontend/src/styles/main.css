@@ -1,0 +1,27 @@
+/**
+ * MonitoringAI – Main Stylesheet
+ * Imports all design system and page styles
+ */
+
+@import './base/_variables.css';
+@import './base/_reset.css';
+@import './base/_typography.css';
+
+@import './components/_corner-brackets.css';
+@import './components/_buttons.css';
+@import './components/_cards.css';
+@import './components/_modals.css';
+@import './components/_forms.css';
+@import './components/_chat-input.css';
+
+@import './layouts/_header.css';
+@import './layouts/_sidebar.css';
+
+@import './pages/_dashboard.css';
+@import './pages/_chat.css';
+@import './pages/_chat-settings.css';
+@import './pages/_admin.css';
+@import './pages/_query-library.css';
+@import './pages/_wizard.css';
+@import './pages/_common-qa.css';
+@import './pages/_login.css';

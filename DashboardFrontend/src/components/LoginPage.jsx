@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const PASSWORD_MIN_LENGTH = 12;
-
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,10 +15,6 @@ export default function LoginPage() {
     setError('');
     if (!userName.trim()) { setError('User name is required.'); return; }
     if (!password) { setError('Password is required.'); return; }
-    if (password.length < PASSWORD_MIN_LENGTH) {
-      setError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters.`);
-      return;
-    }
     setSubmitting(true);
     const result = await login(userName.trim(), password);
     setSubmitting(false);

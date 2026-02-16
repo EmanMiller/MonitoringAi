@@ -1,0 +1,48 @@
+/**
+ * Dashboard – Eclipsis style
+ * Pure black, generous spacing
+ */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-xl);
+  background: var(--color-bg-primary);
+}
+
+.spinner {
+  margin: var(--spacing-2xl) auto;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-text-primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+.forbidden-message {
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-error);
+  font-size: var(--font-size-lg);
+}

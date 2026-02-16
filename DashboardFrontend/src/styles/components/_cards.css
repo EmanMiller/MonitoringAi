@@ -1,0 +1,147 @@
+/**
+ * Cards – Eclipsis style with corner brackets
+ */
+
+/* Base card with corner brackets */
+.card-eclipsis {
+  position: relative;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-lg);
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.card-eclipsis:hover {
+  border-color: var(--color-border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.card-eclipsis.corner-brackets::before,
+.card-eclipsis.corner-brackets::after {
+  border-color: var(--color-border-accent);
+}
+
+/* Common Q&A cards */
+.common-qa-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-normal);
+}
+
+.common-qa-card:hover {
+  border-color: var(--color-border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.common-qa-card-focused {
+  outline: none;
+  border-color: var(--color-border-accent);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Form cards */
+.admin-form-card,
+.ql-form-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.admin-form-card h3,
+.ql-form-card h3 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-thin);
+  color: var(--color-text-primary);
+}
+
+/* Recent Activity card – Eclipsis style */
+.recent-activity-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: var(--spacing-lg);
+  position: relative;
+}
+
+.recent-activity-card::before,
+.recent-activity-card::after {
+  content: '';
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--color-border-accent);
+  pointer-events: none;
+}
+
+.recent-activity-card::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.recent-activity-card::after {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.recent-activity-card__title {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-thin);
+  color: var(--color-text-primary);
+}
+
+.recent-activity-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-activity-card__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.recent-activity-card__item:not(:last-child) {
+  margin-bottom: var(--spacing-xs);
+}
+
+.recent-activity-card__icon {
+  flex-shrink: 0;
+  font-size: var(--font-size-base);
+}
+
+.recent-activity-card__description {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-primary);
+}
+
+.recent-activity-card__time {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.recent-activity-card__state {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.recent-activity-card__state--error {
+  color: var(--color-error);
+}
