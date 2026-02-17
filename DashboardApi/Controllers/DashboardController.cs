@@ -39,6 +39,14 @@ namespace DashboardApi.Controllers
             return Ok(new { connected, message, folderId });
         }
 
+        [HttpGet("confluence-status")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetConfluenceStatus()
+        {
+            var (connected, message) = await _confluenceService.CheckConfluenceConnectionAsync();
+            return Ok(new { connected, message });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateDashboard([FromBody] DashboardCreationRequest request)
         {
@@ -89,6 +97,7 @@ namespace DashboardApi.Controllers
                 var wizardRequest = new DashboardWizardRequest
                 {
                     DashboardTitle = dashboardTitle,
+                    Category = request.Category,
                     UseDefaults = request.UseDefaults,
                     Variables = request.Variables,
                     Panels = request.Panels

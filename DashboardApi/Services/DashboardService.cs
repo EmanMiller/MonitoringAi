@@ -51,12 +51,25 @@ namespace DashboardApi.Services
             }
         }
 
+        /// <summary>Resolves folder ID for a category. Uses optional per-category config (SumoLogic:FolderId:BROWSE_PRODUCT etc.), else Personal root.</summary>
+        private string GetFolderIdForCategory(string? category)
+        {
+            var rootFolder = _configuration["SumoLogic:FolderId"];
+            if (string.IsNullOrEmpty(rootFolder)) return string.Empty;
+
+            if (string.IsNullOrWhiteSpace(category)) return rootFolder;
+
+            var slug = category.Trim().Replace(" ", "_").ToUpperInvariant(); // "Browse Product" -> BROWSE_PRODUCT
+            var categoryFolder = _configuration["SumoLogic:FolderId:" + slug];
+            return !string.IsNullOrEmpty(categoryFolder) ? categoryFolder : rootFolder;
+        }
+
         public async Task<string> CreateDashboardFromWizardAsync(DashboardWizardRequest request)
         {
             var sumoLogicApiUrl = _configuration["SumoLogic:ApiUrl"] ?? "https://api.sumologic.com";
             var sumoLogicApiKey = _configuration["SumoLogic:ApiKey"];
             var sumoLogicApiSecret = _configuration["SumoLogic:ApiSecret"];
-            var folderId = _configuration["SumoLogic:FolderId"];
+            var folderId = GetFolderIdForCategory(request.Category);
 
             if (string.IsNullOrEmpty(sumoLogicApiKey) || string.IsNullOrEmpty(sumoLogicApiSecret))
                 throw new InvalidOperationException("Sumo Logic credentials not configured. Set SUMO_LOGIC_ACCESS_ID and SUMO_LOGIC_ACCESS_KEY in .env.");

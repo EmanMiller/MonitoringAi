@@ -62,6 +62,26 @@ static void LoadEnvFile()
                     Environment.SetEnvironmentVariable("SumoLogic__FolderId", value, EnvironmentVariableTarget.Process);
                 if (string.Equals(key, "SUMO_LOGIC_API_URL", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
                     Environment.SetEnvironmentVariable("SumoLogic__ApiUrl", value, EnvironmentVariableTarget.Process);
+                // Per-category folder overrides: SUMO_LOGIC_FOLDER_ID_BROWSE_PRODUCT, SUMO_LOGIC_FOLDER_ID_CHECKOUT, etc.
+                var categoryMatch = Regex.Match(key, @"^SUMO_LOGIC_FOLDER_ID_(.+)$", RegexOptions.IgnoreCase);
+                if (categoryMatch.Success && !string.IsNullOrEmpty(value))
+                {
+                    var slug = categoryMatch.Groups[1].Value; // e.g. BROWSE_PRODUCT, CHECKOUT
+                    Environment.SetEnvironmentVariable($"SumoLogic__FolderId__{slug}", value, EnvironmentVariableTarget.Process);
+                }
+                // Confluence
+                if (string.Equals(key, "CONFLUENCE_API_URL", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__ApiUrl", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "CONFLUENCE_USERNAME", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__Username", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "CONFLUENCE_API_TOKEN", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__ApiToken", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "CONFLUENCE_PAGE_ID", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__PageId", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "CONFLUENCE_SPACE_KEY", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__SpaceKey", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "CONFLUENCE_SPACE_KEYS", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("Confluence__SpaceKeys", value, EnvironmentVariableTarget.Process);
             }
         }
         break;

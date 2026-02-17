@@ -3,6 +3,7 @@ import {
   getAllQueryLibrary,
   searchQueryLibrary,
   incrementQueryUsage,
+  searchConfluence,
 } from '../services/api';
 
 const CATEGORY_ORDER = [
@@ -108,6 +109,13 @@ function CommonQAPage() {
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const resultListRef = useRef(null);
 
+  // Confluence documentation search
+  const [docSearchInput, setDocSearchInput] = useState('');
+  const [docSearchDebounced, setDocSearchDebounced] = useState('');
+  const [docResults, setDocResults] = useState([]);
+  const [docSearching, setDocSearching] = useState(false);
+  const [docSectionOpen, setDocSectionOpen] = useState(false);
+
   const loadLibrary = useCallback(async () => {
     try {
       const all = await getAllQueryLibrary();
@@ -128,6 +136,33 @@ function CommonQAPage() {
     const t = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
     return () => clearTimeout(t);
   }, [searchInput]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDocSearchDebounced(docSearchInput.trim()), 350);
+    return () => clearTimeout(t);
+  }, [docSearchInput]);
+
+  useEffect(() => {
+    if (!docSearchDebounced) {
+      setDocResults([]);
+      setDocSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setDocSearching(true);
+    searchConfluence(docSearchDebounced, 10)
+      .then((res) => {
+        if (cancelled) return;
+        setDocResults(res?.results ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setDocResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setDocSearching(false);
+      });
+    return () => { cancelled = true; };
+  }, [docSearchDebounced]);
 
   useEffect(() => {
     if (!debouncedSearch) {
@@ -359,6 +394,59 @@ function CommonQAPage() {
             </section>
           </>
         )}
+
+        <section className="common-qa-documentation">
+          <h2 className="common-qa-section-title">📄 Documentation (Confluence)</h2>
+          <button
+            type="button"
+            className="common-qa-accordion-trigger"
+            onClick={() => setDocSectionOpen((o) => !o)}
+            aria-expanded={docSectionOpen}
+          >
+            <span>Search Confluence docs</span>
+            <span className="common-qa-accordion-chevron">{docSectionOpen ? '▼' : '▶'}</span>
+          </button>
+          {docSectionOpen && (
+            <div className="common-qa-doc-search-wrap">
+              <input
+                type="text"
+                className="common-qa-search-input"
+                placeholder="Search documentation (e.g., setup guide, API docs)"
+                value={docSearchInput}
+                onChange={(e) => setDocSearchInput(e.target.value)}
+                aria-label="Search Confluence documentation"
+              />
+              {docSearching && <p className="common-qa-results-count">Searching…</p>}
+              {!docSearching && docSearchDebounced && (
+                <p className="common-qa-results-count" role="status">
+                  Found {docResults.length} {docResults.length === 1 ? 'page' : 'pages'}
+                </p>
+              )}
+              {!docSearching && docResults.length > 0 && (
+                <div className="common-qa-doc-results">
+                  {docResults.map((r) => (
+                    <a
+                      key={r.id}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="common-qa-doc-card"
+                    >
+                      <h4 className="common-qa-doc-card-title">{r.title || 'Untitled'}</h4>
+                      {r.space && <span className="common-qa-badge">{r.space}</span>}
+                      {r.excerpt && (
+                        <p className="common-qa-doc-excerpt">{r.excerpt}</p>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              )}
+              {!docSearching && docSearchDebounced && docResults.length === 0 && (
+                <p className="common-qa-empty-inline">No documentation pages found. Try different keywords.</p>
+              )}
+            </div>
+          )}
+        </section>
 
         <section className="common-qa-quick-actions">
           <button type="button" className="common-qa-btn-request" onClick={() => setRequestModalOpen(true)}>

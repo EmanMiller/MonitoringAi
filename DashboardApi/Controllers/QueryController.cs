@@ -10,12 +10,14 @@ namespace DashboardApi.Controllers;
 public class QueryController : ControllerBase
 {
     private readonly QueryAssistantService _queryAssistant;
+    private readonly SumoLogicQueryService _sumoLogicQuery;
     private readonly ChatRateLimitService _chatRateLimit;
     private readonly IActivityService _activityService;
 
-    public QueryController(QueryAssistantService queryAssistant, ChatRateLimitService chatRateLimit, IActivityService activityService)
+    public QueryController(QueryAssistantService queryAssistant, SumoLogicQueryService sumoLogicQuery, ChatRateLimitService chatRateLimit, IActivityService activityService)
     {
         _queryAssistant = queryAssistant;
+        _sumoLogicQuery = sumoLogicQuery;
         _chatRateLimit = chatRateLimit;
         _activityService = activityService;
     }
@@ -50,15 +52,24 @@ public class QueryController : ControllerBase
     }
 
     [HttpPost("run")]
-    public IActionResult Run([FromBody] QueryRunRequest request)
+    [Authorize]
+    public async Task<IActionResult> Run([FromBody] QueryRunRequest request)
     {
-        return StatusCode(501, new
+        var query = request?.Query?.Trim();
+        if (string.IsNullOrEmpty(query))
+            return BadRequest(new { message = "Query is required.", rows = Array.Empty<object>(), columns = Array.Empty<string>(), rowCount = 0, executionTimeMs = 0L });
+
+        var result = await _sumoLogicQuery.ExecuteQueryAsync(query, request?.TimeRange, request?.Limit ?? 100);
+
+        if (!result.Success)
+            return StatusCode(500, new { message = result.Message, rows = result.Rows, columns = result.Columns, rowCount = result.RowCount, executionTimeMs = result.ExecutionTimeMs });
+
+        return Ok(new
         {
-            message = "Query execution not yet implemented. Sumo Logic integration pending.",
-            rows = Array.Empty<object>(),
-            columns = Array.Empty<string>(),
-            rowCount = 0,
-            executionTimeMs = 0
+            rows = result.Rows,
+            columns = result.Columns,
+            rowCount = result.RowCount,
+            executionTimeMs = result.ExecutionTimeMs
         });
     }
 }

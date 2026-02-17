@@ -201,21 +201,30 @@ export const explainQuery = async (query) => {
 };
 
 /**
+ * Search Confluence documentation. Returns { results: [{ id, title, excerpt, url, space }] }.
+ */
+export const searchConfluence = async (query, limit = 10) => {
+  const { data } = await api.get('/api/Confluence/search', {
+    params: { q: query || undefined, limit: limit || 10 },
+  }).catch(() => ({ data: { results: [] } }));
+  return data;
+};
+
+/**
  * Run a Sumo Logic query and return results.
- * Backend (Gary) implements execution; stub returns mock until ready.
  */
 export const runQuery = async (query, timeRange = '1h', limit = 100) => {
   const { data } = await api.post('/api/Query/run', {
     query,
     timeRange,
     limit,
-  }).catch(() => ({
+  }).catch((err) => ({
     data: {
       rows: [],
       columns: [],
       rowCount: 0,
       executionTimeMs: 0,
-      message: 'Query execution not yet implemented. Backend will provide results.',
+      message: err?.response?.data?.message || 'Query execution failed.',
     },
   }));
   return data;
