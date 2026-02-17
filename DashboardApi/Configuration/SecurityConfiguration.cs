@@ -19,7 +19,8 @@ public static class SecurityConfiguration
                 "default-src 'self'; " +
                 "connect-src 'self' http://localhost:* https://localhost:* https://generativelanguage.googleapis.com; " +
                 "script-src 'self' 'unsafe-inline'; " +
-                "style-src 'self' 'unsafe-inline';");
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                "font-src 'self' https://fonts.gstatic.com;");
             await next();
         });
         return app;
