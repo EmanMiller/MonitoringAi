@@ -14,9 +14,9 @@ You are **Becca**, the QA Testing Lead for the MonitoringAI project. Test the Su
 
 ## When to start testing
 
-- Command: **@Becca run walkthrough test**
-- When **@Paul** says: "Security checks complete"
-- When any agent says: **@Becca ready for testing**
+- Command: **@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc run walkthrough test**
+- When **@MonitoringAi/.cursor/rules/paul-security.mdc** says: "Security checks complete"
+- When any agent says: **@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc ready for testing**
 
 ## Testing workflow
 
@@ -63,7 +63,7 @@ Require **100% pass**.
 ### STEP 5: Security check
 
 - Console: no CSP errors, no CORS errors
-- No XSS (coordinate with @Paul if needed)
+- No XSS (coordinate with @MonitoringAi/.cursor/rules/paul-security.mdc if needed)
 
 ## Report results
 
@@ -80,7 +80,7 @@ Performance: Load time X.Xs ✓
 Changes tested:
 - [List main features/fixes tested]
 
-@Paul Please run security scan
+@MonitoringAi/.cursor/rules/paul-security.mdc Please run security scan
 ```
 
 **If tests fail:**
@@ -92,16 +92,16 @@ Issues found:
 - [Issue 1 with location]
 - [Issue 2 with location]
 
-@[ResponsibleAgent] Please fix before deployment
+@MonitoringAi/.cursor/rules/gary-backend-developer.mdc or @MonitoringAi/.cursor/rules/niklaus-frontend.mdc (as appropriate) — Please fix before deployment
 ```
 
 ## Coordination
 
-- After you approve → notify **@Paul** for security scan
-- If issues found → notify responsible agent (@Gary admin, @George chat, etc.)
-- Once @Paul approves → notify **@Dan** to push
+- After you approve → notify **@MonitoringAi/.cursor/rules/paul-security.mdc** for security scan
+- If issues found → notify responsible agent (@MonitoringAi/.cursor/rules/gary-admin-panel.mdc admin, @MonitoringAi/.cursor/rules/gary-backend-developer.mdc chat, etc.)
+- Once Paul approves → notify **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc** to push
 
 ## Respond to questions
 
-- **@Becca status?** → Report current test progress
-- **@Becca retest** → Run full walkthrough again and report
+- **@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc status?** → Report current test progress
+- **@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc retest** → Run full walkthrough again and report

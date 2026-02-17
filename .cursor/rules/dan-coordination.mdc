@@ -26,15 +26,15 @@ Automatically track changes, commit with smart messages, and push to GitHub only
 
 Push to `main` **only** when **all** of the following are true:
 
-1. **@Paul** has said: "Ready to push - security approved" (or equivalent).
-2. **@Becca** has approved (e.g. "approved", "tests passing", "ready to push").
-3. You receive an **explicit push command**, e.g. **"@Dan push walkthrough test v3"**.
+1. **@MonitoringAi/.cursor/rules/paul-security.mdc** has said: "Ready to push - security approved" (or equivalent).
+2. **@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc** has approved (e.g. "approved", "tests passing", "ready to push").
+3. You receive an **explicit push command**, e.g. **"@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push walkthrough test v3"**.
 
 If either Becca or Paul finds issues, **do NOT push**. Only push after **both** have approved.
 
 ## Manual push / release commit
 
-When you receive: **@Dan push walkthrough test v3** (or similar):
+When you receive: **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push walkthrough test v3** (or similar):
 
 1. Create a **release commit** with this format:
 
@@ -75,10 +75,10 @@ Commit: [RELEASE] Walkthrough test v3
 ## Coordination summary
 
 - **Auto-commit:** You (and the watcher) auto-commit continuously; do **not** auto-push to `main`.
-- **Explicit push:** Only push when you get **"@Dan push walkthrough test vX"** (or equivalent).
-- **Approvals:** Only push to `main` after **both @Becca and @Paul** have approved.
-- **@Dan wait:** If someone says "@Dan wait", hold off pushing; only commit locally (use `.dan-hold` or do not push).
-- **@Dan push this:** Push to GitHub now (after approvals are satisfied).
+- **Explicit push:** Only push when you get **"@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push walkthrough test vX"** (or equivalent).
+- **Approvals:** Only push to `main` after **both @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc and @MonitoringAi/.cursor/rules/paul-security.mdc** have approved.
+- **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc wait:** If someone says "wait", hold off pushing; only commit locally (use `.dan-hold` or do not push).
+- **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push this:** Push to GitHub now (after approvals are satisfied).
 
 ## File watcher
 
@@ -100,12 +100,13 @@ It respects `.dan-hold` (no push) and `.dan-approved` (allow push on `main`). Tr
 ## After pushing
 
 - Confirm with the repository link: https://github.com/EmanMiller/MonitoringAi
-- If push fails, alert: **❌ Push failed: [error message] - @Paul or @Becca please check**
+- If push fails, alert: **❌ Push failed: [error message] - @MonitoringAi/.cursor/rules/paul-security.mdc or @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc please check**
 
 ---
 
 ## Completed tasks
 
+- @mentions updated to file path pattern (MonitoringAi/.cursor/rules/*.mdc) across rules, README_DATABASE, dan-watcher
 - Auth: password verification, JWT/cookies, `/me` fix (Gary)
 - Query/run endpoint (501), CORS 5174 (Gary)
 - Admin route, Sidebar link, AdminView.jsx (Niklaus)

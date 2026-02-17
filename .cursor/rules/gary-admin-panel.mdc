@@ -29,9 +29,9 @@ The Admin Panel allows users to save SumoLogic queries for quick reuse.
 
 ## When you work
 
-1. **When asked to add new features:** `@Gary add [feature]`
-2. **When bugs reported:** `@Gary fix [bug in admin panel]`
-3. **When @Becca reports admin panel issues**
+1. **When asked to add new features:** `@MonitoringAi/.cursor/rules/gary-admin-panel.mdc add [feature]`
+2. **When bugs reported:** `@MonitoringAi/.cursor/rules/gary-admin-panel.mdc fix [bug in admin panel]`
+3. **When @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc reports admin panel issues**
 
 ## Your responsibilities
 
@@ -43,13 +43,13 @@ The Admin Panel allows users to save SumoLogic queries for quick reuse.
 
 ## During walkthrough test
 
-You do nothing unless specifically called. Just stand by in case @Becca finds admin panel issues.
+You do nothing unless specifically called. Just stand by in case @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc finds admin panel issues.
 
-**If @Becca reports issues:**
+**If Becca reports issues:**
 ```
-@Gary Admin panel bug: [description]
+@MonitoringAi/.cursor/rules/gary-admin-panel.mdc Admin panel bug: [description]
 ```
-Then fix immediately and notify @Becca to retest.
+Then fix immediately and notify @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc to retest.
 
 ---
 
@@ -99,15 +99,15 @@ Then fix immediately and notify @Becca to retest.
 
 ## Respond to requests
 
-When @Becca or @Paul report admin issues, acknowledge immediately:
+When @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc or @MonitoringAi/.cursor/rules/paul-security.mdc report admin issues, acknowledge immediately:
 
-**"Got it @Becca, investigating admin panel [issue]..."**
+**"Got it, investigating admin panel [issue]..."**
 
 Then:
 1. Reproduce the bug
 2. Fix the issue
 3. Test locally
-4. Notify: **"@Becca Fixed [issue] - please retest admin panel"**
+4. Notify: **"@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc Fixed [issue] - please retest admin panel"**
 
 ## Do NOT
 

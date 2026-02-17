@@ -14,8 +14,8 @@ if (!GITHUB_TOKEN || GITHUB_TOKEN === 'your_github_token_here') {
 
 console.log(`👤 Git user: ${GITHUB_USERNAME} <${GITHUB_EMAIL}>`);
 
-// Coordination: push to main only after BOTH @Becca AND @Paul approve (set .dan-approved when both have)
-const HOLD_FILE = path.join(__dirname, '.dan-hold');       // @Dan wait → no push
+// Coordination: push to main only after BOTH becca-qa-walkthrough AND paul-security approve (set .dan-approved when both have)
+const HOLD_FILE = path.join(__dirname, '.dan-hold');       // Dan wait → no push
 const APPROVED_FILE = path.join(__dirname, '.dan-approved'); // Both approved → allow push on main
 
 function isHold() {
@@ -143,11 +143,11 @@ function pushToGitHub(commitMessage) {
     const currentBranch = (branchStdout || 'main').trim() || 'main';
 
     if (isHold()) {
-      console.log('⏸️  @Dan wait: holding push. Commit is local only.');
+      console.log('⏸️  Dan wait: holding push. Commit is local only.');
       return;
     }
     if (currentBranch === 'main' && !isApproved()) {
-      console.log('⏳ On main: waiting for @Becca approval before pushing. Commit is local only.');
+      console.log('⏳ On main: waiting for Becca (becca-qa-walkthrough) + Paul (paul-security) approval before pushing. Commit is local only.');
       return;
     }
 
@@ -157,9 +157,9 @@ function pushToGitHub(commitMessage) {
     exec(`git push ${authRepo} ${currentBranch}`, (err, stdout, stderr) => {
       if (err) {
         const errMsg = (stderr || err.message || String(err)).trim();
-        console.error('❌ Push failed:', errMsg, '- @Paul or @Becca please check');
+        console.error('❌ Push failed:', errMsg, '- paul-security or becca-qa-walkthrough please check');
         exec('git push', (err2) => {
-          if (err2) console.error('❌ Push retry failed:', err2.message, '- @Paul or @Becca please check');
+          if (err2) console.error('❌ Push retry failed:', err2.message, '- paul-security or becca-qa-walkthrough please check');
           else console.log('✅ Pushed to GitHub - Commit:', msg, '- Branch:', currentBranch);
         });
         return;

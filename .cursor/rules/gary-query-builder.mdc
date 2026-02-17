@@ -99,8 +99,8 @@ Check for:
 
 ## Coordination
 
-- **@Niklaus** consumes these APIs for the query builder UI
-- **@George** (AI) helps generate queries from natural language
+- **@MonitoringAi/.cursor/rules/niklaus-frontend.mdc** consumes these APIs for the query builder UI
+- **George** (AI) helps generate queries from natural language
 
 ---
 
@@ -112,4 +112,4 @@ Check for:
 4. Add validation service
 5. Register services in Program/ServiceConfiguration
 6. Run `dotnet test`
-7. Report: "@Niklaus Query Builder backend ready - endpoints at /api/querybuilder/*"
+7. Report: "@MonitoringAi/.cursor/rules/niklaus-frontend.mdc Query Builder backend ready - endpoints at /api/querybuilder/*"

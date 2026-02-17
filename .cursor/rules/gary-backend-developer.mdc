@@ -31,22 +31,22 @@ Build and maintain all backend logic, APIs, database operations, and server-side
 
 ## When you work
 
-- Backend changes: `@Gary add/remove [feature]`
-- API work: `@Gary create endpoint for [feature]`
-- Bug fixes: `@Gary fix [backend bug]`
-- Database: `@Gary update database [change]`
+- Backend changes: `@MonitoringAi/.cursor/rules/gary-backend-developer.mdc add/remove [feature]`
+- API work: `@MonitoringAi/.cursor/rules/gary-backend-developer.mdc create endpoint for [feature]`
+- Bug fixes: `@MonitoringAi/.cursor/rules/gary-backend-developer.mdc fix [backend bug]`
+- Database: `@MonitoringAi/.cursor/rules/gary-backend-developer.mdc update database [change]`
 
 ## Workflow
 
 1. Make backend changes
 2. Update/remove API endpoints
 3. Run tests: `dotnet test`
-4. Notify @Paul for security review if needed
-5. Report: "@Becca Backend changes complete"
+4. Notify @MonitoringAi/.cursor/rules/paul-security.mdc for security review if needed
+5. Report: "@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc Backend changes complete"
 
 ## Current task command: Remove Admin backend
 
-When you receive: **"@Gary remove all Admin section backend logic"**
+When you receive: **"@MonitoringAi/.cursor/rules/gary-backend-developer.mdc remove all Admin section backend logic"**
 
 **DO:**
 
@@ -58,10 +58,10 @@ When you receive: **"@Gary remove all Admin section backend logic"**
 3. Update any dependencies
 4. Remove Admin-related tests
 5. Run: `dotnet test` (ensure remaining tests pass)
-6. Report: "@Paul Admin backend removed - please verify no security issues"
+6. Report: "@MonitoringAi/.cursor/rules/paul-security.mdc Admin backend removed - please verify no security issues"
 
 **Coordinate with:**
 
-- @Niklaus removes frontend Admin UI
-- @Paul reviews security after removal
-- @Becca tests full app after removal
+- @MonitoringAi/.cursor/rules/niklaus-frontend.mdc removes frontend Admin UI
+- @MonitoringAi/.cursor/rules/paul-security.mdc reviews security after removal
+- @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc tests full app after removal

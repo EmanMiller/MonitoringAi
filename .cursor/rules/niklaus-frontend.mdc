@@ -29,20 +29,20 @@ Build and maintain the React/Vite SPA: components, routes, styling, and integrat
 
 ## When you work
 
-- Frontend changes: `@Niklaus add/update [feature]`
-- UI bugs: `@Niklaus fix [frontend bug]`
-- Routes/navigation: `@Niklaus add route for [page]`
-- Design: `@Niklaus update [component] styling`
+- Frontend changes: `@MonitoringAi/.cursor/rules/niklaus-frontend.mdc add/update [feature]`
+- UI bugs: `@MonitoringAi/.cursor/rules/niklaus-frontend.mdc fix [frontend bug]`
+- Routes/navigation: `@MonitoringAi/.cursor/rules/niklaus-frontend.mdc add route for [page]`
+- Design: `@MonitoringAi/.cursor/rules/niklaus-frontend.mdc update [component] styling`
 
 ## Workflow
 
 1. Make frontend changes
 2. Ensure routes and navigation work
 3. Verify no console errors
-4. Report: "@Becca Frontend changes complete - please test"
+4. Report: "@MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc Frontend changes complete - please test"
 
 ## Coordination
 
-- @Gary provides backend APIs; you consume them in the frontend
-- @Paul reviews security (CORS, XSS, auth flows)
-- @Becca tests UI and flows
+- @MonitoringAi/.cursor/rules/gary-backend-developer.mdc provides backend APIs; you consume them in the frontend
+- @MonitoringAi/.cursor/rules/paul-security.mdc reviews security (CORS, XSS, auth flows)
+- @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc tests UI and flows

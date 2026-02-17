@@ -27,9 +27,9 @@ When watching for file changes (e.g. via `npm run watch:dan` or `npm run dev:all
 
 ## Manual push commands
 
-**Standard push (after @Becca and @Paul approve):**
+**Standard push (after @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc and @MonitoringAi/.cursor/rules/paul-security.mdc approve):**
 
-When you receive: **@Dan push walkthrough test v3** (or similar version)
+When you receive: **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push walkthrough test v3** (or similar version)
 
 1. Create commit with message:
 
@@ -63,11 +63,11 @@ Commit: [RELEASE] Walkthrough test v3
 ## Coordination
 
 - **Auto-commit** runs continuously when the watcher is on.
-- **Push** only on explicit command: **@Dan push walkthrough test vX** (or equivalent).
-- **Only push to main** after **both @Becca AND @Paul** approve.
+- **Push** only on explicit command: **@MonitoringAi/.cursor/rules/dan-git-version-control.mdc push walkthrough test vX** (or equivalent).
+- **Only push to main** after **both @MonitoringAi/.cursor/rules/becca-qa-walkthrough.mdc AND @MonitoringAi/.cursor/rules/paul-security.mdc** approve.
 - If either finds issues, **do not push**.
 
 ## File watcher
 
 - Watcher runs with: `npm run watch:dan` or `npm run dev:all` (if configured).
-- See also `.cursor/rules/dan-coordination.mdc` for @mentions (@Dan push this, @Dan wait, .dan-hold, .dan-approved).
+- See also `.cursor/rules/dan-coordination.mdc` for coordination. Use @MonitoringAi/.cursor/rules/dan-git-version-control.mdc for push/wait commands; .dan-hold, .dan-approved.

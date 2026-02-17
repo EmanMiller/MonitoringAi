@@ -64,14 +64,14 @@ In `appsettings.Development.json` (or environment):
 
 If the `Users` table is empty on startup, an `admin` user is created with that password (Username: `admin`, Email: `admin@local`).
 
-## Security (for @Paul)
+## Security (for @MonitoringAi/.cursor/rules/paul-security.mdc)
 
 - Connection string: from **Configuration** (appsettings or env); use **Secrets Manager** in production (e.g. AWS Secrets Manager / GCP Secret Manager).
 - Do **not** hardcode credentials.
 - Prefer **SSL/TLS** for Postgres in production; disable **public access** to the DB (VPC/firewall).
 - Use IAM roles (AWS) or service accounts (GCP) where possible; principle of least privilege for DB users.
 
-## For @Gary
+## For @MonitoringAi/.cursor/rules/gary-backend-developer.mdc
 
 Database is configured; connection string is in **appsettings.json** (and optional **Postgres** entry). Services use **ApplicationDbContext**. To apply migrations, run:
 
