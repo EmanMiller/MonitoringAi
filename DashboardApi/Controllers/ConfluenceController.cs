@@ -10,10 +10,50 @@ namespace DashboardApi.Controllers;
 public class ConfluenceController : ControllerBase
 {
     private readonly ConfluenceService _confluenceService;
+    private readonly IConfiguration _configuration;
 
-    public ConfluenceController(ConfluenceService confluenceService)
+    public ConfluenceController(ConfluenceService confluenceService, IConfiguration configuration)
     {
         _confluenceService = confluenceService;
+        _configuration = configuration;
+    }
+
+    /// <summary>Simulate adding a dashboard row to Confluence (no Sumo Logic). For testing Confluence integration.</summary>
+    [HttpPost("add-dashboard")]
+    public async Task<IActionResult> AddDashboard([FromBody] ConfluenceAddDashboardRequest request)
+    {
+        var dashboardName = (request?.DashboardName ?? "").Trim();
+        var projectName = (request?.ProjectName ?? "").Trim();
+        if (string.IsNullOrEmpty(dashboardName))
+            return BadRequest(new { error = "Dashboard name is required." });
+        if (string.IsNullOrEmpty(projectName))
+            return BadRequest(new { error = "Project name is required." });
+
+        var pageId = (request?.ConfluencePageId ?? "").Trim();
+        if (string.IsNullOrEmpty(pageId))
+            pageId = _configuration["Confluence:PageId"] ?? "";
+        if (string.IsNullOrEmpty(pageId))
+            return BadRequest(new { error = "Confluence page ID is required. Set CONFLUENCE_PAGE_ID in .env or pass confluencePageId in the request." });
+
+        var dashboardUrl = (request?.DashboardUrl ?? "").Trim();
+        if (string.IsNullOrEmpty(dashboardUrl))
+            dashboardUrl = "https://sumologic.com/app/dashboards (simulated)";
+
+        var sanitizedName = InputValidationService.SanitizeDashboardName(dashboardName);
+
+        try
+        {
+            await _confluenceService.UpdatePageAsync(pageId, dashboardUrl, sanitizedName, projectName);
+            var baseUrl = (_configuration["Confluence:ApiUrl"] ?? "").TrimEnd('/').Replace("/rest/api", "");
+            var pageUrl = !string.IsNullOrEmpty(baseUrl)
+                ? $"{baseUrl}/pages/viewpage.action?pageId={pageId}"
+                : null;
+            return Ok(new { success = true, pageId, pageUrl, message = "Dashboard row added to Confluence." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Failed to update Confluence page.", details = ex.Message });
+        }
     }
 
     [HttpGet("search")]
@@ -26,4 +66,12 @@ public class ConfluenceController : ControllerBase
         var results = await _confluenceService.SearchAsync(query, Math.Clamp(limit, 1, 50));
         return Ok(new { results });
     }
+}
+
+public class ConfluenceAddDashboardRequest
+{
+    public string? DashboardName { get; set; }
+    public string? ProjectName { get; set; }
+    public string? ConfluencePageId { get; set; }
+    public string? DashboardUrl { get; set; }
 }

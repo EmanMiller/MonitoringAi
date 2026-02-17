@@ -201,6 +201,16 @@ export const explainQuery = async (query) => {
 };
 
 /**
+ * Simulate adding a dashboard row to Confluence (no Sumo Logic).
+ * Body: { dashboardName, projectName, confluencePageId?, dashboardUrl? }.
+ * Returns { success, pageId, pageUrl, message }.
+ */
+export const simulateAddToConfluence = async (payload) => {
+  const { data } = await api.post('/api/Confluence/add-dashboard', payload);
+  return data;
+};
+
+/**
  * Search Confluence documentation. Returns { results: [{ id, title, excerpt, url, space }] }.
  */
 export const searchConfluence = async (query, limit = 10) => {

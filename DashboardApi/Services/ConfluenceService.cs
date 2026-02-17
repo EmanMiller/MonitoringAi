@@ -99,6 +99,31 @@ namespace DashboardApi.Services
                     new XElement("td", "—"));
                 tbody.Add(newRow);
             }
+            else
+            {
+                // No table exists — create "Dashboard Tracking" section and table
+                var newTable = new XElement("table",
+                    new XElement("thead",
+                        new XElement("tr",
+                            new XElement("th", "Project"),
+                            new XElement("th", "Dashboard"),
+                            new XElement("th", "Status"))),
+                    new XElement("tbody",
+                        new XElement("tr",
+                            new XElement("td", projectName),
+                            new XElement("td",
+                                new XElement("a",
+                                    new XAttribute("href", dashboardUrl),
+                                    new XAttribute("target", "_blank"),
+                                    dashboardName)),
+                            new XElement("td", "—"))));
+                var root = xdoc.Root;
+                if (root != null)
+                {
+                    root.Add(new XElement("h2", "Dashboard Tracking"));
+                    root.Add(newTable);
+                }
+            }
 
             // 3. Update page with new content
             var updateRequest = new ConfluencePageUpdateRequest

@@ -101,8 +101,7 @@ function CommonQAPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [searchResult, setSearchResult] = useState({ queries: [], total: 0 });
   const [searching, setSearching] = useState(false);
-  const [viewMode, setViewMode] = useState('browse'); // 'browse' | 'table'
-  const [expandedCategories, setExpandedCategories] = useState({});
+  const [activeCategory, setActiveCategory] = useState(null); // first category with queries
   const [toast, setToast] = useState(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [fullQueryModal, setFullQueryModal] = useState(null);
@@ -114,7 +113,7 @@ function CommonQAPage() {
   const [docSearchDebounced, setDocSearchDebounced] = useState('');
   const [docResults, setDocResults] = useState([]);
   const [docSearching, setDocSearching] = useState(false);
-  const [docSectionOpen, setDocSectionOpen] = useState(false);
+  const [docShowMore, setDocShowMore] = useState(false);
 
   const loadLibrary = useCallback(async () => {
     try {
@@ -212,9 +211,16 @@ function CommonQAPage() {
     ...(byCategory['Other']?.length ? ['Other'] : []),
   ];
 
-  const toggleCategory = (cat) => {
-    setExpandedCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
-  };
+  // Default activeCategory to first category with queries
+  useEffect(() => {
+    if (categoryList.length > 0 && activeCategory === null) {
+      setActiveCategory(categoryList[0]);
+    } else if (categoryList.length > 0 && !categoryList.includes(activeCategory)) {
+      setActiveCategory(categoryList[0]);
+    } else if (categoryList.length === 0) {
+      setActiveCategory(null);
+    }
+  }, [categoryList, activeCategory]);
 
   const handleKeyDown = (e) => {
     if (!hasSearch || !resultListRef.current) return;
@@ -243,7 +249,7 @@ function CommonQAPage() {
   return (
     <div className="common-qa-container">
       <main className="common-qa-main" onKeyDown={handleKeyDown}>
-        <section className="common-qa-hero">
+        <section className="common-qa-hero common-qa-hero-compact">
           <div className="common-qa-hero-inner">
             <span className="common-qa-hero-icon" aria-hidden>📚</span>
             <h1 className="common-qa-hero-title">Common Questions & Queries</h1>
@@ -316,9 +322,9 @@ function CommonQAPage() {
         {!hasSearch && (
           <>
             {popularQueries.length > 0 && (
-              <section className="common-qa-popular">
+              <section className="common-qa-popular common-qa-popular-horizontal">
                 <h2 className="common-qa-section-title">⭐ Popular</h2>
-                <div className="common-qa-results-grid common-qa-popular-grid">
+                <div className="common-qa-popular-row">
                   {popularQueries.map((q) => (
                     <div key={q.id} className="common-qa-card common-qa-card-popular">
                       <span className="common-qa-badge common-qa-badge-popular">⭐ Popular</span>
@@ -354,40 +360,41 @@ function CommonQAPage() {
               </section>
             )}
 
-            <section className="common-qa-categories">
+            <section className="common-qa-categories common-qa-categories-tabs">
               <h2 className="common-qa-section-title">Browse by category</h2>
-              <div className="common-qa-accordion">
+              <div className="common-qa-tabs" role="tablist">
                 {categoryList.map((cat) => {
                   const count = byCategory[cat]?.length ?? 0;
-                  const open = expandedCategories[cat] ?? false;
+                  const isActive = activeCategory === cat;
                   return (
-                    <div key={cat} className="common-qa-accordion-item">
-                      <button
-                        type="button"
-                        className="common-qa-accordion-trigger"
-                        onClick={() => toggleCategory(cat)}
-                        aria-expanded={open}
-                      >
-                        <span>{cat} ({count} queries)</span>
-                        <span className="common-qa-accordion-chevron">{open ? '▼' : '▶'}</span>
-                      </button>
-                      <div className={`common-qa-accordion-panel ${open ? 'common-qa-accordion-panel-open' : ''}`}>
-                        <div className="common-qa-results-grid">
-                          {(byCategory[cat] || []).map((q) => (
-                            <QueryCard
-                              key={q.id}
-                              query={q}
-                              searchTerm=""
-                              onCopy={() => showToast('Query copied!')}
-                              onViewFull={setFullQueryModal}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <button
+                      key={cat}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      className={`common-qa-tab ${isActive ? 'common-qa-tab-active' : ''}`}
+                      onClick={() => setActiveCategory(cat)}
+                    >
+                      {cat} ({count})
+                    </button>
                   );
                 })}
               </div>
+              {activeCategory && (
+                <div className="common-qa-tab-panel" role="tabpanel">
+                  <div className="common-qa-results-grid">
+                    {(byCategory[activeCategory] || []).map((q) => (
+                      <QueryCard
+                        key={q.id}
+                        query={q}
+                        searchTerm=""
+                        onCopy={() => showToast('Query copied!')}
+                        onViewFull={setFullQueryModal}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
               {CATEGORY_ORDER.every((c) => (byCategory[c]?.length ?? 0) === 0) && allQueries.length === 0 && (
                 <p className="common-qa-empty-inline">No queries in the library yet. Contact your administrator to add queries.</p>
               )}
@@ -395,112 +402,58 @@ function CommonQAPage() {
           </>
         )}
 
-        <section className="common-qa-documentation">
+        <section className="common-qa-documentation common-qa-doc-inline">
           <h2 className="common-qa-section-title">📄 Documentation (Confluence)</h2>
-          <button
-            type="button"
-            className="common-qa-accordion-trigger"
-            onClick={() => setDocSectionOpen((o) => !o)}
-            aria-expanded={docSectionOpen}
-          >
-            <span>Search Confluence docs</span>
-            <span className="common-qa-accordion-chevron">{docSectionOpen ? '▼' : '▶'}</span>
-          </button>
-          {docSectionOpen && (
-            <div className="common-qa-doc-search-wrap">
-              <input
-                type="text"
-                className="common-qa-search-input"
-                placeholder="Search documentation (e.g., setup guide, API docs)"
-                value={docSearchInput}
-                onChange={(e) => setDocSearchInput(e.target.value)}
-                aria-label="Search Confluence documentation"
-              />
-              {docSearching && <p className="common-qa-results-count">Searching…</p>}
-              {!docSearching && docSearchDebounced && (
-                <p className="common-qa-results-count" role="status">
-                  Found {docResults.length} {docResults.length === 1 ? 'page' : 'pages'}
-                </p>
-              )}
-              {!docSearching && docResults.length > 0 && (
-                <div className="common-qa-doc-results">
-                  {docResults.map((r) => (
-                    <a
-                      key={r.id}
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="common-qa-doc-card"
-                    >
-                      <h4 className="common-qa-doc-card-title">{r.title || 'Untitled'}</h4>
-                      {r.space && <span className="common-qa-badge">{r.space}</span>}
-                      {r.excerpt && (
-                        <p className="common-qa-doc-excerpt">{r.excerpt}</p>
-                      )}
-                    </a>
-                  ))}
-                </div>
-              )}
-              {!docSearching && docSearchDebounced && docResults.length === 0 && (
-                <p className="common-qa-empty-inline">No documentation pages found. Try different keywords.</p>
-              )}
-            </div>
-          )}
+          <div className="common-qa-doc-search-wrap">
+            <input
+              type="text"
+              className="common-qa-search-input common-qa-doc-input"
+              placeholder="Search documentation (e.g., setup guide, API docs)"
+              value={docSearchInput}
+              onChange={(e) => setDocSearchInput(e.target.value)}
+              aria-label="Search Confluence documentation"
+            />
+            {docSearching && <p className="common-qa-results-count">Searching…</p>}
+            {!docSearching && docSearchDebounced && (
+              <p className="common-qa-results-count" role="status">
+                Found {docResults.length} {docResults.length === 1 ? 'page' : 'pages'}
+              </p>
+            )}
+            {!docSearching && docResults.length > 0 && (
+              <div className="common-qa-doc-results">
+                {(docShowMore ? docResults : docResults.slice(0, 5)).map((r) => (
+                  <a
+                    key={r.id}
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="common-qa-doc-card"
+                  >
+                    <h4 className="common-qa-doc-card-title">{r.title || 'Untitled'}</h4>
+                    {r.space && <span className="common-qa-badge">{r.space}</span>}
+                    {r.excerpt && (
+                      <p className="common-qa-doc-excerpt">{r.excerpt}</p>
+                    )}
+                  </a>
+                ))}
+                {docResults.length > 5 && !docShowMore && (
+                  <button type="button" className="common-qa-show-more" onClick={() => setDocShowMore(true)}>
+                    Show {docResults.length - 5} more
+                  </button>
+                )}
+              </div>
+            )}
+            {!docSearching && docSearchDebounced && docResults.length === 0 && (
+              <p className="common-qa-empty-inline">No documentation pages found. Try different keywords.</p>
+            )}
+          </div>
         </section>
 
         <section className="common-qa-quick-actions">
           <button type="button" className="common-qa-btn-request" onClick={() => setRequestModalOpen(true)}>
             Request New Query
           </button>
-          <button type="button" className="common-qa-btn-all" onClick={() => setViewMode(viewMode === 'table' ? 'browse' : 'table')}>
-            {viewMode === 'table' ? 'Show categories' : 'View All Queries'}
-          </button>
         </section>
-
-        {viewMode === 'table' && (
-          <section className="common-qa-table-section">
-            <h2 className="common-qa-section-title">All queries</h2>
-            <div className="common-qa-table-wrap">
-              <table className="admin-table common-qa-table">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Key</th>
-                    <th>Query (preview)</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allQueries.map((q) => (
-                    <tr key={q.id}>
-                      <td><span className="common-qa-badge" data-category={q.category}>{q.category || '—'}</span></td>
-                      <td>{q.name || '—'}</td>
-                      <td><code className="admin-value-cell">{ (q.queryText || '').slice(0, 80) }…</code></td>
-                      <td>
-                        <button
-                          type="button"
-                          className="common-qa-btn-copy small"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(q.queryText || '');
-                              showToast('Query copied!');
-                              await incrementQueryUsage(q.id);
-                            } catch (_) {}
-                          }}
-                        >
-                          Copy
-                        </button>
-                        <button type="button" className="common-qa-btn-view small" onClick={() => setFullQueryModal(q)}>
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
       </main>
 
       {toast && (

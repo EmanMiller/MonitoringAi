@@ -3,6 +3,7 @@ using DashboardApi.Data;
 using DashboardApi.Models;
 using DashboardApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DashboardApi.Controllers;
 
@@ -14,16 +15,14 @@ public class ChatController : ControllerBase
     private readonly ChatRateLimitService _rateLimit;
     private readonly QueryAssistantAiService _queryAi;
     private readonly DashboardFlowService _dashboardFlow;
-    private readonly QueryMatchService _queryMatch;
     private readonly ApplicationDbContext _db;
 
-    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow, QueryMatchService queryMatch, ApplicationDbContext db)
+    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow, ApplicationDbContext db)
     {
         _chatService = chatService;
         _rateLimit = rateLimit;
         _queryAi = queryAi;
         _dashboardFlow = dashboardFlow;
-        _queryMatch = queryMatch;
         _db = db;
     }
 
@@ -94,7 +93,7 @@ public class ChatController : ControllerBase
     }
 
     /// <summary>
-    /// Match user natural language to a query from the mock library. Body: { userInput }. Rate limited.
+    /// Match user natural language to a query from the real QueryLibrary (database). Body: { userInput }. Rate limited.
     /// </summary>
     [HttpPost("match-query")]
     public async Task<ActionResult<QueryMatchResult>> MatchQuery([FromBody] MatchQueryRequest request)
@@ -113,14 +112,45 @@ public class ChatController : ControllerBase
 
         var sanitized = InputValidationService.SanitizeMatchQueryInput(request!.UserInput);
         var redacted = InputValidationService.StripPii(sanitized);
-        var result = await _queryMatch.MatchQueryAsync(redacted);
+
+        var libraryItems = await _db.QueryLibrary.OrderBy(x => x.Category).ThenBy(x => x.Key).Take(100).ToListAsync();
+        var library = libraryItems.Select(x => new QueryLibraryEntryForMatch
+        {
+            Id = x.Id.ToString(),
+            Category = x.Category ?? "",
+            Name = x.Key ?? "",
+            Description = x.Key ?? "",
+            Query = x.Value ?? ""
+        }).ToList();
+
+        if (library.Count == 0)
+        {
+            var noLib = new QueryMatchResult { Matched = false, Message = "No query library available. Add queries in Common Q&A or contact your admin." };
+            await TryLogChatExchangeAsync(userId, request!.ConversationId, redacted, $"No match: {noLib.Message}");
+            return Ok(noLib);
+        }
+
+        if (!_chatService.IsConfigured())
+        {
+            var noGemini = new QueryMatchResult { Matched = false, Message = "Set up GEMINI_API_KEY for semantic query matching. Or browse Common Q&A to find queries." };
+            await TryLogChatExchangeAsync(userId, request!.ConversationId, redacted, $"No match: {noGemini.Message}");
+            return Ok(noGemini);
+        }
+
+        var result = await _queryAi.MatchQueryAsync(redacted, library);
+        var confidenceValue = (result.Confidence ?? "medium").ToLowerInvariant() switch
+        {
+            "high" => 0.9,
+            "low" => 0.5,
+            _ => 0.7
+        };
         var safe = new QueryMatchResult
         {
             Matched = result.Matched,
             Query = result.Query != null ? InputValidationService.SanitizeForDisplay(result.Query) : null,
             Category = result.Category != null ? InputValidationService.SanitizeForDisplay(result.Category) : null,
             Explanation = result.Explanation != null ? InputValidationService.SanitizeForDisplay(result.Explanation) : null,
-            Confidence = result.Confidence,
+            Confidence = confidenceValue,
             Message = result.Message != null ? InputValidationService.SanitizeForDisplay(result.Message) : null
         };
         var assistantContent = result.Matched
