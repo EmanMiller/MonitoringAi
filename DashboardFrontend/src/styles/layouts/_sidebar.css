@@ -153,6 +153,11 @@
   overflow: hidden;
 }
 
+/* Ensure all 5 placeholders visible when loading (no clipping) */
+.sidebar .recent-activity-card--loading {
+  min-height: 280px;
+}
+
 .sidebar .recent-activity-card__list {
   flex: 1;
   overflow-y: auto;

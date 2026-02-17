@@ -37,7 +37,7 @@ function RecentActivity() {
   const PLACEHOLDER_COUNT = 5;
 
   return (
-    <div className="recent-activity-card">
+    <div className={`recent-activity-card${loading ? ' recent-activity-card--loading' : ''}`}>
       <h2 className="recent-activity-card__title">Recent Activity</h2>
       {loading && (
         <ul className="recent-activity-card__list" aria-label="Loading recent activities">
