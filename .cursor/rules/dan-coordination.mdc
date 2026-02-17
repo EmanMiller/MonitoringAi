@@ -106,6 +106,8 @@ It respects `.dan-hold` (no push) and `.dan-approved` (allow push on `main`). Tr
 
 ## Completed tasks
 
+- Recent Activity: 5 placeholder items with messageFadeIn + shimmer animation while loading (Niklaus)
+- Rachel rule: Post-task workflow (Becca QA → Paul security → dan-coordination → Dan push) added
 - Admin section removed (route, Sidebar link, AdminPanel, AdminView, QueryLibraryView) — Niklaus
 - @mentions updated to file path pattern (MonitoringAi/.cursor/rules/*.mdc) across rules, README_DATABASE, dan-watcher
 - Auth: password verification, JWT/cookies, `/me` fix (Gary)

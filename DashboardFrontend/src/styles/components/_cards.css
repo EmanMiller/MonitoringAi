@@ -166,6 +166,76 @@
   color: var(--color-error);
 }
 
+/* Placeholder items – same animation as chat messages (messageFadeIn) */
+@keyframes activityItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recent-activity-card__item--placeholder {
+  animation: activityItemFadeIn 0.4s ease both;
+}
+
+.recent-activity-card__item--placeholder[data-intro-index] {
+  animation-delay: calc(0.5s + var(--intro-index, 0) * 0.1s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recent-activity-card__item--placeholder {
+    animation: none;
+  }
+}
+
+.recent-activity-card__icon--placeholder,
+.recent-activity-card__description--placeholder,
+.recent-activity-card__time--placeholder {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 0%,
+    var(--color-border) 50%,
+    var(--color-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: activityPlaceholderShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.recent-activity-card__icon--placeholder {
+  width: 1em;
+  height: 1em;
+}
+
+.recent-activity-card__description--placeholder {
+  flex: 1;
+  min-width: 120px;
+  height: 1em;
+}
+
+.recent-activity-card__time--placeholder {
+  width: 3em;
+  height: 0.875em;
+}
+
+@keyframes activityPlaceholderShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recent-activity-card__icon--placeholder,
+  .recent-activity-card__description--placeholder,
+  .recent-activity-card__time--placeholder {
+    animation: none;
+  }
+}
+
 /* Crypto-style widget cards (Flock Ramp) */
 .widget-card {
   background: var(--gradient-card);

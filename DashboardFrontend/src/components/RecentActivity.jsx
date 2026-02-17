@@ -34,11 +34,25 @@ function RecentActivity() {
     return () => { cancelled = true; };
   }, []);
 
+  const PLACEHOLDER_COUNT = 5;
+
   return (
     <div className="recent-activity-card">
       <h2 className="recent-activity-card__title">Recent Activity</h2>
       {loading && (
-        <p className="recent-activity-card__state">Loading…</p>
+        <ul className="recent-activity-card__list" aria-label="Loading recent activities">
+          {Array.from({ length: PLACEHOLDER_COUNT }, (_, i) => (
+            <li
+              key={`placeholder-${i}`}
+              className="recent-activity-card__item recent-activity-card__item--placeholder"
+              data-intro-index={i}
+            >
+              <span className="recent-activity-card__icon recent-activity-card__icon--placeholder" aria-hidden />
+              <span className="recent-activity-card__description recent-activity-card__description--placeholder" />
+              <span className="recent-activity-card__time recent-activity-card__time--placeholder" />
+            </li>
+          ))}
+        </ul>
       )}
       {error && (
         <p className="recent-activity-card__state recent-activity-card__state--error" role="alert">
