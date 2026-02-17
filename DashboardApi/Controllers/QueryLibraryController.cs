@@ -11,9 +11,9 @@ namespace DashboardApi.Controllers;
 [Route("api/[controller]")]
 public class QueryLibraryController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
 
-    public QueryLibraryController(AppDbContext db)
+    public QueryLibraryController(ApplicationDbContext db)
     {
         _db = db;
     }

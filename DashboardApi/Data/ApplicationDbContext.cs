@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Dashboard> Dashboards { get; set; }
     public DbSet<Query> Queries { get; set; }
+    public DbSet<QueryLibraryItem> QueryLibrary { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ChatHistory> ChatHistory { get; set; }
     public DbSet<LogMapping> LogMappings { get; set; }
@@ -88,6 +89,18 @@ public class ApplicationDbContext : DbContext
             e.Property(x => x.QueryText).HasMaxLength(8192);
             e.Property(x => x.Category).HasMaxLength(64);
             e.Property(x => x.Tags).HasMaxLength(1024);
+        });
+
+        // QueryLibraryItem (admin-managed query library for Common Q&A)
+        modelBuilder.Entity<QueryLibraryItem>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Category).HasMaxLength(128);
+            e.Property(x => x.Key).HasMaxLength(256);
+            e.Property(x => x.Value).HasMaxLength(8192);
+            e.Property(x => x.TagsJson).HasMaxLength(2048);
+            e.Property(x => x.CreatedBy).HasMaxLength(128);
+            e.Property(x => x.RoleRequired).HasMaxLength(64);
         });
 
         // UserPreferences (onboarding)

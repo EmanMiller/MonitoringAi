@@ -4,7 +4,7 @@ namespace DashboardApi.Services;
 
 public class ActivityService : IActivityService
 {
-    private readonly List<Activity> _activities = new();
+    private readonly List<ActivityDto> _activities = new();
     private readonly object _lock = new();
 
     public ActivityService()
@@ -19,7 +19,7 @@ public class ActivityService : IActivityService
     {
         lock (_lock)
         {
-            _activities.Add(new Activity
+            _activities.Add(new ActivityDto
             {
                 Id = Guid.NewGuid(),
                 Type = type ?? "unknown",
@@ -30,7 +30,7 @@ public class ActivityService : IActivityService
         }
     }
 
-    public List<Activity> GetRecentActivities(int count = 10)
+    public List<ActivityDto> GetRecentActivities(int count = 10)
     {
         lock (_lock)
         {
