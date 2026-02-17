@@ -152,6 +152,19 @@ export const postChat = async (message, history = []) => {
 };
 
 /**
+ * Dashboard creation flow: step-by-step guided conversation.
+ * Body: { message, history, flowContext? }. Returns { responseText, stepData?, completePayload? }.
+ */
+export const postDashboardFlow = async (message, history = [], flowContext = null) => {
+  const { data } = await api.post('/api/Chat/dashboard-flow', {
+    message,
+    history: history.map((m) => ({ sender: m.sender, text: m.text })),
+    flowContext,
+  });
+  return data;
+};
+
+/**
  * Query Builder AI: natural language → Sumo Logic query + explanation.
  * Body: { userInput, context? }. Returns { query, explanation, confidence }.
  */

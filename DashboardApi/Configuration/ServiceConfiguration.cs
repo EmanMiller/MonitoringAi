@@ -25,7 +25,9 @@ public static class ServiceConfiguration
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<LogPermissionDenialFilter>();
         services.AddSingleton<ChatRateLimitService>();
+        services.AddSingleton<DashboardRateLimitService>();
         services.AddScoped<QueryAssistantAiService>();
+        services.AddScoped<DashboardFlowService>();
 
         return services;
     }

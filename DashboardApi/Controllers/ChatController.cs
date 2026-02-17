@@ -1,6 +1,6 @@
 using System.Security.Claims;
+using DashboardApi.Models;
 using DashboardApi.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DashboardApi.Controllers;
@@ -12,12 +12,14 @@ public class ChatController : ControllerBase
     private readonly GeminiChatService _chatService;
     private readonly ChatRateLimitService _rateLimit;
     private readonly QueryAssistantAiService _queryAi;
+    private readonly DashboardFlowService _dashboardFlow;
 
-    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi)
+    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow)
     {
         _chatService = chatService;
         _rateLimit = rateLimit;
         _queryAi = queryAi;
+        _dashboardFlow = dashboardFlow;
     }
 
     /// <summary>
@@ -56,7 +58,8 @@ public class ChatController : ControllerBase
         try
         {
             var responseText = await _chatService.SendChatAsync(sanitized, history);
-            return Ok(new ChatResponse { Response = responseText });
+            var safeText = InputValidationService.SanitizeForDisplay(responseText);
+            return Ok(new ChatResponse { Response = safeText });
         }
         catch (InvalidOperationException ex)
         {
@@ -178,6 +181,75 @@ public class ChatController : ControllerBase
             return StatusCode(503, new { error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Dashboard creation conversation: send user message with optional flowContext and history; get response plus optional step data or complete payload.
+    /// </summary>
+    [HttpPost("dashboard-flow")]
+    public async Task<ActionResult<DashboardFlowResponse>> DashboardFlow([FromBody] DashboardFlowRequest request)
+    {
+        if (!_chatService.IsConfigured())
+            return StatusCode(503, new { error = "Gemini API not configured." });
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+        var (allowed, retryAfter) = _rateLimit.TryConsume(userId);
+        if (!allowed)
+        {
+            Response.Headers.RetryAfter = retryAfter.ToString();
+            return StatusCode(429, new { details = "Too many requests. Please wait.", retryAfterSeconds = retryAfter });
+        }
+        var message = InputValidationService.SanitizeChatMessage(request?.Message);
+        if (string.IsNullOrWhiteSpace(message))
+            return BadRequest(new { details = "message is required." });
+        if (message.Length > 2000)
+            return BadRequest(new { details = "message must be at most 2000 characters." });
+
+        var historyItems = request?.History?.Select(h => new DashboardFlowHistoryItem { Sender = h.Sender, Text = InputValidationService.SanitizeChatMessage(h.Text) }).ToList();
+
+        DashboardFlowContext? flowContext = null;
+        if (request?.FlowContext != null)
+        {
+            var fc = request.FlowContext;
+            flowContext = new DashboardFlowContext
+            {
+                Step = fc.Step,
+                Collected = fc.Collected == null ? null : new DashboardCollected
+                {
+                    DashboardTitle = fc.Collected.DashboardTitle,
+                    UseDefaults = fc.Collected.UseDefaults,
+                    Variables = fc.Collected.Variables == null ? null : new TemplateVariables
+                    {
+                        Timeslice = fc.Collected.Variables.Timeslice,
+                        Domain = fc.Collected.Variables.Domain,
+                        DomainPrefix = fc.Collected.Variables.DomainPrefix,
+                        Environment = fc.Collected.Variables.Environment
+                    },
+                    Panels = fc.Collected.Panels
+                }
+            };
+        }
+
+        try
+        {
+            var result = await _dashboardFlow.ProcessAsync(message, flowContext, historyItems, HttpContext.RequestAborted);
+            var stepData = result.StepData == null ? null : new DashboardStepDataDto
+            {
+                Step = result.StepData.Step,
+                Prompt = result.StepData.Prompt,
+                Type = result.StepData.Type,
+                Options = result.StepData.Options
+            };
+            return Ok(new DashboardFlowResponse
+            {
+                ResponseText = result.ResponseText,
+                StepData = stepData,
+                CompletePayload = result.CompletePayload
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(503, new { error = ex.Message });
+        }
+    }
 }
 
 public class GenerateQueryRequest
@@ -237,4 +309,48 @@ public class ChatTurnDto
 public class ChatResponse
 {
     public string Response { get; set; } = "";
+}
+
+public class DashboardFlowRequest
+{
+    public string? Message { get; set; }
+    public DashboardFlowContextDto? FlowContext { get; set; }
+    public List<ChatTurnDto>? History { get; set; }
+}
+
+public class DashboardFlowContextDto
+{
+    public int? Step { get; set; }
+    public DashboardCollectedDto? Collected { get; set; }
+}
+
+public class DashboardCollectedDto
+{
+    public string? DashboardTitle { get; set; }
+    public bool? UseDefaults { get; set; }
+    public TemplateVariablesDto? Variables { get; set; }
+    public Dictionary<string, object>? Panels { get; set; }
+}
+
+public class TemplateVariablesDto
+{
+    public string? Timeslice { get; set; }
+    public string? Domain { get; set; }
+    public string? DomainPrefix { get; set; }
+    public string? Environment { get; set; }
+}
+
+public class DashboardFlowResponse
+{
+    public string ResponseText { get; set; } = "";
+    public DashboardStepDataDto? StepData { get; set; }
+    public DashboardWizardRequest? CompletePayload { get; set; }
+}
+
+public class DashboardStepDataDto
+{
+    public int Step { get; set; }
+    public string? Prompt { get; set; }
+    public string? Type { get; set; }
+    public List<string>? Options { get; set; }
 }

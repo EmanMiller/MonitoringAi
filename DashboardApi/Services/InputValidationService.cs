@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using DashboardApi.Models;
 
 namespace DashboardApi.Services;
 
@@ -128,5 +129,68 @@ public static class InputValidationService
         var lower = input.ToLowerInvariant();
         var dangerous = new[] { "exec(", "eval(", "system(", "shell(", "cmd(", "powershell", "bash ", "sh -" };
         return dangerous.Any(lower.Contains);
+    }
+
+    // Wizard: allowed variable values (prevent injection / arbitrary payloads)
+    private static readonly HashSet<string> AllowedTimeslice = new(StringComparer.OrdinalIgnoreCase) { "5m", "15m", "30m", "1h" };
+    private static readonly HashSet<string> AllowedDomain = new(StringComparer.OrdinalIgnoreCase) { "example.com", "another.com" };
+    private static readonly HashSet<string> AllowedDomainPrefix = new(StringComparer.OrdinalIgnoreCase) { "www", "api" };
+    private static readonly HashSet<string> AllowedEnvironment = new(StringComparer.OrdinalIgnoreCase) { "prod", "staging" };
+    private static readonly HashSet<string> AllowedPanelKeys = new(StringComparer.OrdinalIgnoreCase)
+        { "Success Rate %", "Error Rate %", "Slow Queries", "Past 7 day trend" };
+    private static readonly HashSet<string> AllowedPanelCustomValues = new(StringComparer.OrdinalIgnoreCase)
+        { "Request Success %", "Uptime %", "Health Check Pass Rate", "4xx/5xx Rate", "Exception Count", "Failed Request %",
+          "Query Response Time", "Database Latency", "API Timeout Errors", "Custom Query", "Week-over-Week Change", "Rolling 7d Average", "Trend Analysis" };
+
+    /// <summary>Validate wizard Variables and Panels before calling DashboardService. Do not trust AI or client payload blindly.</summary>
+    public static (bool Valid, string? Error) ValidateWizardRequest(DashboardWizardRequest? request)
+    {
+        if (request == null) return (false, "Request is required.");
+        var (titleValid, titleError) = ValidateDashboardName(request.DashboardTitle);
+        if (!titleValid) return (false, titleError);
+
+        if (!request.UseDefaults)
+        {
+            if (request.Variables == null)
+                return (false, "Variables are required when not using defaults.");
+            if (request.Variables.Timeslice != null && !AllowedTimeslice.Contains(request.Variables.Timeslice.Trim()))
+                return (false, "Invalid Variables.Timeslice.");
+            if (request.Variables.Domain != null && !AllowedDomain.Contains(request.Variables.Domain.Trim()))
+                return (false, "Invalid Variables.Domain.");
+            if (request.Variables.DomainPrefix != null && !AllowedDomainPrefix.Contains(request.Variables.DomainPrefix.Trim()))
+                return (false, "Invalid Variables.DomainPrefix.");
+            if (request.Variables.Environment != null && !AllowedEnvironment.Contains(request.Variables.Environment.Trim()))
+                return (false, "Invalid Variables.Environment.");
+        }
+
+        if (request.Panels != null)
+        {
+            foreach (var kv in request.Panels)
+            {
+                var key = kv.Key?.Trim();
+                if (string.IsNullOrEmpty(key)) continue;
+                bool isCustomKey = key.EndsWith("_custom", StringComparison.OrdinalIgnoreCase);
+                var baseKey = isCustomKey ? key[..^7].Trim() : key;
+                if (!AllowedPanelKeys.Contains(baseKey))
+                    return (false, $"Invalid panel key: {baseKey}.");
+                if (isCustomKey && kv.Value is string s && !AllowedPanelCustomValues.Contains(s.Trim()))
+                    return (false, $"Invalid panel custom value for {baseKey}.");
+                if (!isCustomKey && kv.Value != null && !(kv.Value is bool))
+                    return (false, $"Panel value for {baseKey} must be boolean.");
+            }
+        }
+
+        return (true, null);
+    }
+
+    /// <summary>Sanitize AI or user-generated text before sending to client (XSS).</summary>
+    public static string SanitizeForDisplay(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        var s = input;
+        foreach (var tag in DangerousScriptTags)
+            s = Regex.Replace(s, tag, "", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+        s = Regex.Replace(s, @"<[^>]*>", "", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        return s.Trim();
     }
 }

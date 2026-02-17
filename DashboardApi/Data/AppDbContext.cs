@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<LogMapping> LogMappings => Set<LogMapping>();
     public DbSet<SavedQuery> SavedQueries => Set<SavedQuery>();
     public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<QueryLibraryItem> QueryLibrary => Set<QueryLibraryItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,11 +39,21 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(e =>
         {
             e.HasKey(x => x.Id);
-            e.HasIndex(x => x.UserName).IsUnique();
-            e.Property(x => x.UserName).HasMaxLength(128);
+            e.HasIndex(x => x.Username).IsUnique();
+            e.Property(x => x.Username).HasMaxLength(128);
             e.Property(x => x.PasswordHash).HasMaxLength(256);
             e.Property(x => x.Role).HasMaxLength(64);
             e.Property(x => x.RefreshToken).HasMaxLength(512);
+        });
+        modelBuilder.Entity<QueryLibraryItem>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Category).HasMaxLength(128);
+            e.Property(x => x.Key).HasMaxLength(256);
+            e.Property(x => x.Value).HasMaxLength(8192);
+            e.Property(x => x.TagsJson).HasMaxLength(2048);
+            e.Property(x => x.CreatedBy).HasMaxLength(128);
+            e.Property(x => x.RoleRequired).HasMaxLength(64);
         });
     }
 }

@@ -112,9 +112,11 @@ Improve the landing page chat experience with three goals:
 
 ---
 
-### @Gary (Backend)
+### @Gary (Backend) + @Niklaus (Pairing)
 
 #### CARD 3: Chat Endpoint for Dashboard Creation Flow
+
+**Pairing note:** Niklaus, pair with Gary on this card. You bring frontend expectations and can help validate the API contract, request/response shapes, and integration points as Gary implements. Use pairing to unblock and speed delivery.
 
 **Components affected:**
 - `ChatController.cs` — extend `Post` or add `PostDashboardCreation`
@@ -151,10 +153,17 @@ Improve the landing page chat experience with three goals:
 4. **Auth**
    - Require authenticated user for dashboard creation; pass userId to DashboardService if needed
 
+**Niklaus pairing responsibilities:**
+- Review API contract (request body, response shape) to ensure frontend can consume it
+- Call endpoints from frontend or Postman during development to verify structure
+- Align on `flowContext` and `structured` response format so Card 2 (chat flow UI) integrates smoothly
+- Flag any mismatch between backend response and what `Message`, `ChatMessageOptions`, etc. need
+
 **Acceptance criteria:**
 - [ ] Chat endpoint accepts flowContext and returns structured step data when applicable
 - [ ] Dashboard creation succeeds when AI returns complete payload
 - [ ] All inputs validated; errors returned clearly to frontend
+- [ ] API contract validated with Niklaus during pairing
 
 ---
 
@@ -266,7 +275,7 @@ Improve the landing page chat experience with three goals:
 
 ```
 George (AI) ─────────────────────────┐
-                                     ├──► Gary (Backend) ──► Integration
+                                     ├──► Gary + Niklaus (Pair on Backend) ──► Integration
 Niklaus (Formatting) ──► Can start   │
 Niklaus (Chat Flow UI) ──────────────┘
          │
@@ -275,14 +284,16 @@ Niklaus (Chat Flow UI) ──────────────┘
 ```
 
 - **Niklaus** Card 1 (formatting) can be done first, in parallel with George
+- **Gary + Niklaus** pair on Card 3 (backend endpoint); Niklaus validates API from frontend perspective
 - **George** and **Gary** should align on structured format (e.g., `[DASHBOARD_STEP]` / `[DASHBOARD_COMPLETE]`)
-- **Niklaus** Card 2 depends on Gary/George API contract
+- **Niklaus** Card 2 depends on Gary/George API contract (pairing on Card 3 helps unblock)
 - **Becca** tests after integration
 
 ---
 
 ## NOTES
 
+- **Gary + Niklaus pairing:** Niklaus to pair with Gary on Card 3 (backend) to unblock and ensure API contract matches frontend needs
 - `DashboardWizardRequest` and `createDashboardFromWizard` already exist; reuse them
 - `RECOMMENDED_DEFAULTS` in `DashboardCreatorWizard.jsx` should be shared with George (or defined in a shared config) so options match
 - Consider adding a "Create Dashboard" quick action chip in the chat input area (e.g., next to placeholder) for discoverability

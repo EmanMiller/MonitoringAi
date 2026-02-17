@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Message from './Message';
 import ChatInput from './Chat/ChatInput';
 import ChatSettingsModal from './ChatSettingsModal';
 import Toast from './Toast';
-import { getChatStatus, postChat } from '../services/api';
+import { getChatStatus, postChat, postDashboardFlow, createDashboardFromWizard } from '../services/api';
+import { useDashboardFlow } from '../context/DashboardFlowContext';
 
 const NO_KEY_MESSAGE = 'Chat is not configured. Ask your administrator to set the Gemini API key on the server.';
 const WELCOME_MESSAGE = 'How can I help you today?';
@@ -23,12 +24,21 @@ function getChatErrorMessage(err) {
   return details || err.message || 'Something went wrong.';
 }
 
+const DASHBOARD_CREATION_PROMPT = 'I want to create a dashboard';
+
 const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
   const [chatAvailable, setChatAvailable] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ message: '', variant: 'error' });
+  const [dashboardFlowState, setDashboardFlowState] = useState({
+    active: false,
+    step: 0,
+    collected: {},
+    lastStepData: null,
+  });
+  const { consumeRequest, pendingRequest } = useDashboardFlow();
 
   const showToast = useCallback((message, variant = 'error') => {
     setToast({ message, variant });
@@ -48,6 +58,7 @@ const ChatWindow = () => {
   useEffect(() => {
     checkStatus();
   }, [checkStatus]);
+
 
   useEffect(() => {
     if (chatAvailable) {
@@ -79,21 +90,88 @@ const ChatWindow = () => {
     });
     setLoading(true);
 
+    const useDashboardFlow = text.trim() === DASHBOARD_CREATION_PROMPT || dashboardFlowState.active;
+    let collected = { ...dashboardFlowState.collected };
+    if (useDashboardFlow && dashboardFlowState.lastStepData) {
+      const sd = dashboardFlowState.lastStepData;
+      if (sd.step === 1) collected = { ...collected, dashboardTitle: text.trim() };
+      else if (sd.step === 2 && sd.options?.includes(text.trim()))
+        collected = { ...collected, panels: { ...(collected.panels || {}), [text.trim()]: true } };
+      else if (sd.step === 3) collected = { ...collected, useDefaults: text.trim().toLowerCase().includes('default') || text.trim().toLowerCase() === 'yes' };
+    }
+    const history = messages
+      .filter((m) => m.sender === 'user' || m.sender === 'assistant')
+      .concat([userMessage])
+      .slice(0, -1);
+    const flowContext = useDashboardFlow ? {
+      step: dashboardFlowState.step,
+      collected: Object.keys(collected).length ? {
+        dashboardTitle: collected.dashboardTitle,
+        useDefaults: collected.useDefaults,
+        variables: collected.variables,
+        panels: collected.panels,
+      } : null,
+    } : null;
+
     try {
-      const history = messages
-        .filter((m) => m.sender === 'user' || m.sender === 'assistant')
-        .concat([userMessage])
-        .slice(0, -1);
-      const data = await postChat(text.trim(), history);
-      const reply = data?.response ?? '';
-      setMessages((prev) => [...prev, { text: reply || 'No response.', sender: 'assistant', timestamp: Date.now() }]);
+      let data;
+      if (useDashboardFlow) {
+        data = await postDashboardFlow(text.trim(), history, flowContext);
+      } else {
+        data = await postChat(text.trim(), history);
+      }
+
+      if (useDashboardFlow && data) {
+        const { responseText, stepData, completePayload } = data;
+        const assistantMsg = {
+          text: responseText || 'Continuing...',
+          sender: 'assistant',
+          timestamp: Date.now(),
+          stepData: stepData || undefined,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+
+        if (completePayload) {
+          setDashboardFlowState({ active: false, step: 0, collected: {}, lastStepData: null });
+          try {
+            const result = await createDashboardFromWizard(completePayload);
+            showToast(`Dashboard created! ${result?.dashboardUrl ? 'View in Sumo Logic.' : ''}`, 'success');
+            setMessages((prev) => [...prev, {
+              text: `✅ Your dashboard has been created successfully.`,
+              sender: 'assistant',
+              timestamp: Date.now(),
+            }]);
+          } catch (e) {
+            showToast('Dashboard creation failed. ' + (e?.response?.data?.message || e.message));
+          }
+        } else if (stepData) {
+          setDashboardFlowState((s) => ({
+            ...s,
+            active: true,
+            step: stepData.step ?? s.step + 1,
+            lastStepData: stepData,
+          }));
+        }
+      } else {
+        const reply = data?.response ?? data?.responseText ?? '';
+        setMessages((prev) => [...prev, { text: reply || 'No response.', sender: 'assistant', timestamp: Date.now() }]);
+      }
     } catch (err) {
       showToast(getChatErrorMessage(err));
       setMessages((prev) => prev.filter((m) => m !== userMessage));
     } finally {
       setLoading(false);
     }
-  }, [messages, showToast]);
+  }, [messages, dashboardFlowState, showToast]);
+
+  const handleSendMessageRef = useRef(handleSendMessage);
+  handleSendMessageRef.current = handleSendMessage;
+
+  useEffect(() => {
+    if (consumeRequest()) {
+      handleSendMessageRef.current(DASHBOARD_CREATION_PROMPT);
+    }
+  }, [consumeRequest, pendingRequest]);
 
   const handleUseSuggestedQuery = useCallback((queryValue) => {
     const now = Date.now();
@@ -109,10 +187,11 @@ const ChatWindow = () => {
     });
   }, []);
 
-  const displayMessages = messages.filter((m) => m.text);
+  const displayMessages = messages.filter((m) => m.text || m.stepData);
+  const lastWithStepData = [...displayMessages].reverse().find((m) => m.sender === 'assistant' && m.stepData);
 
   return (
-    <div className="chat-container">
+    <div className="chat-container corner-brackets">
       <div className="chat-header">
         <span className="chat-header-title">Chat</span>
         <div className="chat-header-right">
@@ -133,7 +212,13 @@ const ChatWindow = () => {
       </div>
       <div className="message-list">
         {displayMessages.map((message, index) => (
-          <Message key={`${index}-${message.text?.slice(0, 20)}`} message={message} />
+          <Message
+            key={`${index}-${message.text?.slice(0, 20)}`}
+            message={message}
+            isActiveStep={!loading && message === lastWithStepData}
+            onOptionSelect={(val) => handleSendMessage(val)}
+            onInputSubmit={(val) => handleSendMessage(val)}
+          />
         ))}
         {loading && (
           <div className="message assistant typing-indicator">

@@ -12,3 +12,11 @@ node_modules/
 
 # Dan watcher runs from repo root; keep existing ignores in subprojects
 # (DashboardFrontend and DashboardApi have their own .gitignore)
+
+# QA, task breakdowns, and review docs (local/coordination only)
+QA_REPORT.md
+QA_SIGN_OFF_REPORT.md
+RACHEL_REVIEW.md
+TASK_BREAKDOWN_*.md
+TASK_CARDS.md
+docs/BECCA_CARD*_E2E_CHECKLIST.md

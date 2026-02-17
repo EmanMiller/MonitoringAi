@@ -1,10 +1,18 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDashboardFlow } from '../context/DashboardFlowContext';
 import RecentActivity from './RecentActivity';
 
-const Sidebar = ({ onStartWizard, onQuickQuery }) => {
+const Sidebar = ({ onQuickQuery }) => {
   const { user } = useAuth();
+  const { requestDashboardCreation } = useDashboardFlow();
+  const navigate = useNavigate();
+
+  const handleCreateDashboard = () => {
+    requestDashboardCreation();
+    navigate('/');
+  };
 
   return (
     <aside className="sidebar">
@@ -14,7 +22,7 @@ const Sidebar = ({ onStartWizard, onQuickQuery }) => {
           <span>Dashboard</span>
         </NavLink>
         {user && (
-          <button onClick={onStartWizard} data-icon="dashboard">
+          <button onClick={handleCreateDashboard} data-icon="dashboard">
             <span className="icon-wrap"><span className="icon">📊</span></span>
             <span>Create Dashboard</span>
           </button>

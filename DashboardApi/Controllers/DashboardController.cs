@@ -1,35 +1,46 @@
+using System.Security.Claims;
 using DashboardApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using DashboardApi.Models;
-using System;
 
 namespace DashboardApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class DashboardController : ControllerBase
     {
         private readonly DashboardService _dashboardService;
         private readonly ConfluenceService _confluenceService;
         private readonly IConfiguration _configuration;
         private readonly IActivityService _activityService;
+        private readonly DashboardRateLimitService _dashboardRateLimit;
 
         public DashboardController(
             DashboardService dashboardService,
             ConfluenceService confluenceService,
             IConfiguration configuration,
-            IActivityService activityService)
+            IActivityService activityService,
+            DashboardRateLimitService dashboardRateLimit)
         {
             _dashboardService = dashboardService;
             _confluenceService = confluenceService;
             _configuration = configuration;
             _activityService = activityService;
+            _dashboardRateLimit = dashboardRateLimit;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateDashboard([FromBody] DashboardCreationRequest request)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+            var (allowed, retryAfter) = _dashboardRateLimit.TryConsume(userId);
+            if (!allowed)
+            {
+                Response.Headers.RetryAfter = retryAfter.ToString();
+                return StatusCode(429, new { error = "Too many dashboard creations. Please try again later.", retryAfterSeconds = retryAfter });
+            }
             try
             {
                 var (valid, error) = InputValidationService.ValidateDashboardName(request?.DashboardName);
@@ -54,8 +65,15 @@ namespace DashboardApi.Controllers
         [HttpPost("wizard")]
         public async Task<IActionResult> CreateFromWizard([FromBody] DashboardWizardRequest request)
         {
-            var (valid, error) = InputValidationService.ValidateDashboardName(request?.DashboardTitle);
-            if (!valid) return BadRequest(error ?? "Request is missing required parameters.");
+            var (wizardValid, wizardError) = InputValidationService.ValidateWizardRequest(request);
+            if (!wizardValid) return BadRequest(wizardError ?? "Invalid wizard request.");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+            var (allowed, retryAfter) = _dashboardRateLimit.TryConsume(userId);
+            if (!allowed)
+            {
+                Response.Headers.RetryAfter = retryAfter.ToString();
+                return StatusCode(429, new { error = "Too many dashboard creations. Please try again later.", retryAfterSeconds = retryAfter });
+            }
             var dashboardTitle = InputValidationService.SanitizeDashboardName(request!.DashboardTitle);
 
             try

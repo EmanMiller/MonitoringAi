@@ -1,17 +1,14 @@
 /**
  * Chat input – Flock Ramp style
+ * Part of chat flex layout (no position:fixed) to avoid overlap on scroll
  * Purple glow, gradient send button
  */
 
 .chat-input-container {
-  position: fixed;
-  bottom: 0;
-  left: 280px;
-  right: 0;
-  background: var(--color-bg-primary);
+  flex-shrink: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--color-border);
-  padding: var(--spacing-md);
-  z-index: 100;
+  background: var(--color-bg-secondary);
 }
 
 .chat-input-form {
@@ -24,7 +21,7 @@
 
 .chat-input-textarea {
   flex: 1;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-input);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
@@ -80,7 +77,7 @@
 }
 
 @media (max-width: 900px) {
-  .chat-input-container {
-    left: 0;
+  .chat-input-form {
+    width: 100%;
   }
 }

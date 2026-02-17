@@ -7,10 +7,12 @@ import QueryBuilderPage from './components/QueryBuilder/QueryBuilderPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './components/LoginPage';
 import { AuthProvider } from './context/AuthContext';
+import { DashboardFlowProvider } from './context/DashboardFlowContext';
 
 function App() {
   return (
     <AuthProvider>
+      <DashboardFlowProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -21,6 +23,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </DashboardFlowProvider>
     </AuthProvider>
   );
 }
