@@ -20,10 +20,12 @@ public static class ServiceConfiguration
 
         services.AddScoped<DashboardService>();
         services.AddScoped<ConfluenceService>();
+        services.AddScoped<OnboardingService>();
         services.AddSingleton<IActivityService, ActivityService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<LogPermissionDenialFilter>();
         services.AddSingleton<ChatRateLimitService>();
+        services.AddScoped<QueryAssistantAiService>();
 
         return services;
     }

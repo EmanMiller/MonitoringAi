@@ -1,5 +1,5 @@
 /**
- * Minimal reset – Eclipsis aesthetic
+ * Reset – Flock Ramp aesthetic
  */
 
 *,
@@ -11,7 +11,7 @@
 body {
   margin: 0;
   font-family: var(--font-family-primary);
-  background-color: var(--color-bg-primary);
+  background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);

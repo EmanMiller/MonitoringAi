@@ -1,0 +1,115 @@
+---
+description: Gary (Query Builder Backend) – APIs to execute, validate, save, and history queries; SumoLogic integration
+alwaysApply: false
+globs: ["**/QueryBuilder*", "**/SumoLogic*", "**/QueryExecution*", "**/api/querybuilder*"]
+---
+
+# Gary – Query Builder Backend
+
+Build APIs to execute and store queries. Integrate with SumoLogic API.
+
+## API endpoints to create
+
+### Execute query
+- **POST** `/api/querybuilder/execute`
+- **Body:** `{ userId, query, timeRange, limit }`
+- Validates query syntax
+- Executes against SumoLogic API
+- **Returns:** `{ success, records[], count, executionTimeMs, error }`
+- Logs execution for history
+
+### Validate query (no execution)
+- **POST** `/api/querybuilder/validate`
+- **Body:** `{ query }`
+- Checks syntax without executing
+- **Returns:** `{ isValid, errors[], warnings[] }`
+
+### Available fields
+- **GET** `/api/querybuilder/fields`
+- Returns list of available fields for dropdowns
+- Example: `_sourceCategory`, `status`, `error`, `user_id`, `response_time`
+
+### Save query
+- **POST** `/api/querybuilder/save`
+- **Body:** `{ userId, name, query, description, category }`
+- Saves query to database
+- Returns saved query object
+
+### Get user's saved queries
+- **GET** `/api/querybuilder/user/{userId}`
+- Returns all saved queries for user, ordered by most recent
+
+### Execution history
+- **GET** `/api/querybuilder/history/{userId}?limit=50`
+- Returns recent query execution history (last N queries run by user)
+
+### Delete saved query
+- **DELETE** `/api/querybuilder/{queryId}`
+- Deletes saved query
+
+---
+
+## SumoLogic integration
+
+Create **SumoLogicClient** service:
+
+- Use credentials from `.env`: `SUMO_LOGIC_ACCESS_ID`, `SUMO_LOGIC_ACCESS_KEY`
+- Parse time ranges (e.g. "Last 24 hours" → actual timestamps)
+- Transform SumoLogic response to simple JSON
+- Handle errors gracefully
+
+---
+
+## Query validation
+
+Check for:
+
+- Empty queries → invalid
+- Dangerous operations: `delete`, `drop` → invalid
+- Missing source specification → warn (performance issue)
+- Valid operators → pass
+
+---
+
+## Models
+
+### SavedQuery (query builder)
+- Id, UserId, Name, Query, Description, Category, CreatedAt
+
+### QueryExecutionLog
+- Id, UserId, Query, Success, RecordCount, ExecutionTimeMs, ExecutedAt
+
+---
+
+## Database
+
+- Create migrations or entities for **SavedQueries** (query builder) and **QueryExecutionLog** tables
+- Ensure distinct from existing SavedQuery if schema differs
+
+---
+
+## Testing
+
+1. Test with mock SumoLogic data first
+2. Then integrate with real API
+3. Verify all endpoints work
+4. `dotnet test` → all pass
+
+---
+
+## Coordination
+
+- **@Niklaus** consumes these APIs for the query builder UI
+- **@George** (AI) helps generate queries from natural language
+
+---
+
+## Workflow
+
+1. Create models and DbContext entities
+2. Create SumoLogicClient service
+3. Create QueryBuilderController with all endpoints
+4. Add validation service
+5. Register services in Program/ServiceConfiguration
+6. Run `dotnet test`
+7. Report: "@Niklaus Query Builder backend ready - endpoints at /api/querybuilder/*"

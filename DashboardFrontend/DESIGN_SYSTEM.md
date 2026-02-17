@@ -1,88 +1,77 @@
 # MonitoringAI Design System
 
-**Eclipsis aesthetic:** Pure black, minimal, modern like ChatGPT
+**Flock Ramp aesthetic:** Premium crypto/finance SaaS – deep indigo, purple gradients
 
 ---
 
 ## Color Palette
 
-### Dark Theme (Eclipsis)
+### Backgrounds
 
-| Variable | Hex | Usage |
-|----------|-----|-------|
-| `--color-bg-primary` | `#000000` | Main background |
-| `--color-bg-secondary` | `#0a0a0a` | Cards, elevated surfaces |
-| `--color-bg-tertiary` | `#1a1a1a` | Elevated surfaces |
-| `--color-border` | `#2a2a2a` | Subtle borders |
-| `--color-border-accent` | `#ffffff` | White accent borders |
-| `--color-text-primary` | `#ffffff` | Primary text |
-| `--color-text-secondary` | `#a0a0a0` | Secondary text |
-| `--color-text-tertiary` | `#6a6a6a` | Muted gray |
-| `--color-hover` | `rgba(255,255,255,0.05)` | Subtle hover |
-| `--color-success` | `#10b981` | Success states |
-| `--color-error` | `#ef4444` | Error states |
-| `--color-warning` | `#f59e0b` | Warning states |
+| Variable | Value | Usage |
+|----------|-------|-------|
+| `--color-bg-primary` | `#0a0e1a` | Main background |
+| `--color-bg-secondary` | `#141824` | Cards, elevated |
+| `--color-bg-tertiary` | `#1a1f2e` | Elevated surfaces |
+| `--color-bg-card` | `#1e2333` | Card base |
 
----
+### Gradients
 
-## Spacing (Generous, ChatGPT-like)
+| Variable | Usage |
+|----------|-------|
+| `--gradient-primary` | Page backgrounds |
+| `--gradient-card` | Cards, panels |
+| `--gradient-purple` | Primary buttons |
+
+### Text
 
 | Variable | Value |
 |----------|-------|
-| `--spacing-xs` | 8px |
-| `--spacing-sm` | 16px |
-| `--spacing-md` | 24px |
-| `--spacing-lg` | 32px |
-| `--spacing-xl` | 48px |
-| `--spacing-2xl` | 64px |
+| `--color-text-primary` | `#ffffff` |
+| `--color-text-secondary` | `#a0a3bd` |
+| `--color-text-tertiary` | `#6b7280` |
+| `--color-text-accent` | `#818cf8` |
+
+### Accents
+
+| Variable | Value |
+|----------|-------|
+| `--color-border-accent` | `#6366f1` |
+| `--color-accent-primary` | `#6366f1` |
+| `--color-accent-secondary` | `#8b5cf6` |
+| `--color-accent-pink` | `#ec4899` |
+| `--color-success` | `#10b981` |
+
+### Crypto Card Colors
+
+| Variable | Value |
+|----------|-------|
+| `--color-ethereum` | `#627eea` |
+| `--color-bitcoin` | `#f7931a` |
+| `--color-binance` | `#f3ba2f` |
+| `--color-tether` | `#26a17b` |
+| `--color-solana` | `#dc1fff` |
+
+### Effects
+
+| Variable | Usage |
+|----------|-------|
+| `--glow-purple` | Button/card hover |
+| `--glow-blue` | Secondary hover |
+| `--shadow-focus` | Input focus |
+| `--glass-bg` | Modal glassmorphism |
 
 ---
 
-## Typography
+## Components
 
-- **Primary font:** Inter, -apple-system, system-ui, sans-serif
-- **Headings:** Thin weight (300)
-- **Body:** Regular (400)
-
----
-
-## Corner Brackets (Eclipsis Signature)
-
-Use `.corner-brackets` on cards for top-left and top-right white bracket accents. Recent Activity card includes built-in corner brackets.
+- **Primary buttons:** `--gradient-purple`, glow on hover
+- **Cards:** `--gradient-card`, purple corner brackets, glow on hover
+- **Modals:** Glassmorphism (backdrop-filter, semi-transparent)
+- **Sidebar:** Gradient cards with colored icon backgrounds
 
 ---
 
-## Button Style (Ghost)
+## Widget Cards
 
-- Primary: Transparent bg, white border, white text
-- Hover: White bg, black text (inverted)
-- Secondary: Transparent, gray text, no border
-
----
-
-## File Structure
-
-```
-src/styles/
-├── base/
-│   ├── _variables.css
-│   ├── _reset.css
-│   └── _typography.css
-├── components/
-│   ├── _corner-brackets.css
-│   ├── _buttons.css
-│   ├── _cards.css
-│   ├── _modals.css
-│   └── _forms.css
-├── layouts/
-│   ├── _header.css
-│   └── _sidebar.css
-└── pages/
-    ├── _dashboard.css
-    ├── _chat.css
-    ├── _common-qa.css
-    ├── _admin.css
-    ├── _login.css
-    ├── _wizard.css
-    └── ...
-```
+Use `.widget-card` with `.widget-card__icon--ethereum`, `--bitcoin`, `--purple`, `--success` for crypto-style widgets with colored icons and large numbers.

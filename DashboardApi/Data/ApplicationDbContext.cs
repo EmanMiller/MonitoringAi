@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChatHistory> ChatHistory { get; set; }
     public DbSet<LogMapping> LogMappings { get; set; }
     public DbSet<SavedQuery> SavedQueries { get; set; }
+    public DbSet<UserPreferences> UserPreferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +88,15 @@ public class ApplicationDbContext : DbContext
             e.Property(x => x.QueryText).HasMaxLength(8192);
             e.Property(x => x.Category).HasMaxLength(64);
             e.Property(x => x.Tags).HasMaxLength(1024);
+        });
+
+        // UserPreferences (onboarding)
+        modelBuilder.Entity<UserPreferences>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.UserId).IsUnique();
+            e.Property(x => x.UserId).HasMaxLength(128);
+            e.Property(x => x.SelectedInterestsJson).HasMaxLength(2048);
         });
     }
 }

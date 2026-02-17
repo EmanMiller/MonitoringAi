@@ -1,5 +1,5 @@
 /**
- * Eclipsis corner brackets – signature card style
+ * Corner brackets – purple accent (Flock Ramp)
  */
 
 .corner-brackets {
@@ -56,7 +56,6 @@
   border-top: none;
 }
 
-/* Simpler approach: use wrapper with pseudo on inner for bottom corners */
 .corner-brackets-inner {
   position: relative;
 }

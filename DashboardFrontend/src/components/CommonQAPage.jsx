@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Header from './Header';
 import {
   getAllQueryLibrary,
   searchQueryLibrary,
@@ -207,9 +206,7 @@ function CommonQAPage() {
   }, [focusedIndex]);
 
   return (
-    <div className="app-container common-qa-container">
-      <Header backTo="/" backLabel="Back to Dashboard" />
-
+    <div className="common-qa-container">
       <main className="common-qa-main" onKeyDown={handleKeyDown}>
         <section className="common-qa-hero">
           <div className="common-qa-hero-inner">

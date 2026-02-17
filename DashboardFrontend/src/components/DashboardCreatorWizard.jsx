@@ -111,6 +111,7 @@ const CustomSelectionDropdown = ({
       setHighlightIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === 'Enter' && filtered[highlightIndex]) {
       e.preventDefault();
+      e.stopPropagation();
       onSelect(filtered[highlightIndex]);
     } else if (e.key === 'Escape') {
       onClose?.();
@@ -450,10 +451,22 @@ const DashboardCreatorWizard = ({ isOpen, onClose }) => {
     return false;
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.target.closest('.custom-selection-dropdown')) return;
+    e.preventDefault();
+    if (isGenerating) return;
+    if (step < 3 && !getNextDisabled()) {
+      handleNext();
+    } else if (step === 3 && canGenerate) {
+      handleGenerate();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay wizard-overlay wizard-dark">
+    <div className="modal-overlay wizard-overlay wizard-dark" onKeyDown={handleKeyDown}>
       <div className="modal-content wizard-modal-dark">
         <div className="modal-header">
           <h2>{isGenerating ? 'Generating Dashboard' : '📊 Create a New Dashboard'}</h2>

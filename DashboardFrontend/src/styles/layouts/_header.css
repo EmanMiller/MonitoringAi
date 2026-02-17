@@ -1,6 +1,5 @@
 /**
- * Header – Eclipsis style
- * Pure black, 64px height, thin bottom border
+ * Header – Flock Ramp style
  */
 
 .header {
@@ -29,7 +28,7 @@
 }
 
 .header-back-link:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-accent);
   text-decoration: underline;
 }
 

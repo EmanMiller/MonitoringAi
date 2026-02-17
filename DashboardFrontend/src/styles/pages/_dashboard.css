@@ -1,6 +1,6 @@
 /**
- * Dashboard – Eclipsis style
- * Pure black, generous spacing
+ * Dashboard – Flock Ramp style
+ * Gradient background, premium feel
  */
 
 .app-container {
@@ -15,13 +15,21 @@
   flex-grow: 1;
   padding: var(--spacing-xl);
   gap: var(--spacing-xl);
-  background: var(--color-bg-primary);
+  background: var(--gradient-primary);
+}
+
+.main-content-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .spinner {
   margin: var(--spacing-2xl) auto;
   border: 3px solid var(--color-border);
-  border-top-color: var(--color-text-primary);
+  border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -37,7 +45,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--color-bg-primary);
+  background: var(--gradient-primary);
 }
 
 .forbidden-message {

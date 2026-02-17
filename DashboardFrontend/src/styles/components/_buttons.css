@@ -1,73 +1,53 @@
 /**
- * Buttons – Eclipsis ghost style
+ * Buttons – Flock Ramp style
+ * Primary: purple gradient with glow
+ * Secondary: ghost with purple accent
  */
 
 .button-primary,
-.button-secondary {
+.btn-primary {
+  background: var(--gradient-purple);
+  color: #ffffff;
+  border: none;
   padding: 12px 24px;
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-normal);
+  box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
 }
 
-.button-primary {
+.button-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--glow-purple);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.button-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-secondary,
+.btn-secondary {
   background: transparent;
-  border: 1px solid var(--color-border-accent);
-  color: var(--color-text-primary);
-}
-
-.button-primary:hover:not(:disabled) {
-  background: var(--color-border-accent);
-  color: var(--color-bg-primary);
-}
-
-.button-secondary {
-  background: transparent;
-  border: none;
-  color: var(--color-text-tertiary);
-}
-
-.button-secondary:hover {
-  color: var(--color-text-primary);
-}
-
-.btn-primary {
-  background: transparent;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-accent);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   padding: 12px 24px;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-normal);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-border-accent);
-  color: var(--color-bg-primary);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--color-text-tertiary);
-  border: none;
-  padding: 12px 24px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: color var(--transition-normal);
-}
-
+.button-secondary:hover,
 .btn-secondary:hover {
   color: var(--color-text-primary);
+  border-color: var(--color-border-accent);
+  box-shadow: var(--glow-blue);
 }
 
 .close-button {
@@ -98,9 +78,9 @@
 }
 
 .header-logout:hover {
-  background: var(--color-hover);
-  color: var(--color-text-primary);
   border-color: var(--color-border-accent);
+  color: var(--color-text-primary);
+  box-shadow: var(--glow-blue);
 }
 
 .admin-back-btn,
@@ -117,7 +97,7 @@
 
 .admin-back-btn:hover,
 .header-back-link:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-accent);
 }
 
 .modal-footer button:disabled {

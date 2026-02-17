@@ -1,29 +1,25 @@
 /**
- * Cards – Eclipsis style with corner brackets
+ * Cards – Flock Ramp style
+ * Gradient backgrounds, purple corner brackets
  */
 
-/* Base card with corner brackets */
 .card-eclipsis {
   position: relative;
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
   padding: var(--spacing-lg);
-  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
 }
 
 .card-eclipsis:hover {
   border-color: var(--color-border-accent);
-  box-shadow: var(--shadow-glow);
-}
-
-.card-eclipsis.corner-brackets::before,
-.card-eclipsis.corner-brackets::after {
-  border-color: var(--color-border-accent);
+  box-shadow: var(--glow-purple);
 }
 
 /* Common Q&A cards */
 .common-qa-card {
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -32,7 +28,7 @@
 
 .common-qa-card:hover {
   border-color: var(--color-border-accent);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--glow-purple);
 }
 
 .common-qa-card-focused {
@@ -44,7 +40,7 @@
 /* Form cards */
 .admin-form-card,
 .ql-form-card {
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -59,13 +55,19 @@
   color: var(--color-text-primary);
 }
 
-/* Recent Activity card – Eclipsis style */
+/* Recent Activity card – gradient + purple brackets */
 .recent-activity-card {
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
+  transition: all var(--transition-normal);
+}
+
+.recent-activity-card:hover {
+  border-color: var(--color-border-accent);
+  box-shadow: var(--glow-purple);
 }
 
 .recent-activity-card::before,
@@ -144,4 +146,45 @@
 
 .recent-activity-card__state--error {
   color: var(--color-error);
+}
+
+/* Crypto-style widget cards (Flock Ramp) */
+.widget-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-normal);
+}
+
+.widget-card:hover {
+  border-color: var(--color-border-accent);
+  box-shadow: var(--glow-purple);
+}
+
+.widget-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.widget-card__icon--ethereum { background: rgba(98, 126, 234, 0.25); color: var(--color-ethereum); }
+.widget-card__icon--bitcoin { background: rgba(247, 147, 26, 0.25); color: var(--color-bitcoin); }
+.widget-card__icon--purple { background: rgba(99, 102, 241, 0.25); color: var(--color-accent-primary); }
+.widget-card__icon--success { background: rgba(16, 185, 129, 0.25); color: var(--color-success); }
+
+.widget-card__value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.widget-card__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }

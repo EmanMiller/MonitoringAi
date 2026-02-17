@@ -4,3 +4,48 @@ GET {{DashboardApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+# Onboarding API
+@userId = test-user-123
+
+### GET preferences (creates default if not found)
+GET {{DashboardApi_HostAddress}}/api/onboarding/preferences/{{userId}}
+Accept: application/json
+
+### POST progress
+POST {{DashboardApi_HostAddress}}/api/onboarding/progress
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "step": 2
+}
+
+### POST complete
+POST {{DashboardApi_HostAddress}}/api/onboarding/complete
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "interests": ["Application Performance", "Error Tracking"]
+}
+
+### POST skip
+POST {{DashboardApi_HostAddress}}/api/onboarding/skip
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}"
+}
+
+### POST create-dashboard
+POST {{DashboardApi_HostAddress}}/api/onboarding/create-dashboard
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "dashboardName": "My Onboarding Dashboard",
+  "interests": ["Application Performance", "Error Tracking", "Security Events"],
+  "timeRange": "7d"
+}
+
+###

@@ -10,7 +10,7 @@
         "projectUniqueName": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/DashboardApi.csproj",
         "projectName": "DashboardApi",
         "projectPath": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/DashboardApi.csproj",
-        "packagesPath": "/Users/emmanuelmiller/.nuget/packages/",
+        "packagesPath": "/var/folders/sx/_jh68tbd4nq14k56f1nkc3b00000gn/T/cursor-sandbox-cache/53c3ebc64d00a24e88e30a62b51448a4/nuget",
         "outputPath": "/Users/emmanuelmiller/Projects/SumoLogic/MonitoringAi/DashboardApi/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [

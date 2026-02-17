@@ -70,6 +70,48 @@ public class GeminiChatService
     }
 
     /// <summary>
+    /// One-shot generation with system instruction (e.g. for query generation, explain, optimize).
+    /// </summary>
+    public async Task<string> GenerateWithSystemAsync(string systemInstruction, string userMessage, CancellationToken cancellationToken = default)
+    {
+        var apiKey = GetApiKey();
+        var modelName = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
+        if (string.IsNullOrEmpty(apiKey))
+            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
+
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={apiKey}";
+        var body = new
+        {
+            systemInstruction = new { parts = new[] { new { text = systemInstruction } } },
+            contents = new[] { new { parts = new[] { new { text = userMessage } } } },
+            generationConfig = new
+            {
+                temperature = 0.3,
+                maxOutputTokens = 2048,
+                topP = 0.95,
+                topK = 40
+            }
+        };
+        var json = JsonConvert.SerializeObject(body);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(url, content, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            throw new InvalidOperationException("API key invalid. Check settings.");
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests || (int)response.StatusCode == 429)
+            throw new InvalidOperationException("Too many requests. Wait 1 minute.");
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Gemini unavailable. ({response.StatusCode})");
+
+        var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        var parsed = JsonConvert.DeserializeObject<dynamic>(responseJson);
+        var text = parsed?.candidates?[0]?.content?.parts?[0]?.text?.ToString()?.Trim();
+        if (string.IsNullOrEmpty(text))
+            throw new InvalidOperationException("Gemini returned no response.");
+        return text;
+    }
+
+    /// <summary>
     /// Returns true if Gemini is configured (API key set).
     /// </summary>
     public bool IsConfigured()

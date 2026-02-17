@@ -6,7 +6,7 @@
   padding: var(--spacing-2xl);
   max-width: 1200px;
   margin: 0 auto;
-  background: var(--color-bg-primary);
+  background: var(--gradient-primary);
 }
 
 .admin-panel { width: 100%; max-width: 1200px; margin: 0 auto; }
@@ -30,13 +30,14 @@
 .admin-tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-border-accent); }
 
 .admin-tab-content {
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
 }
 
 .admin-view {
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
   padding: var(--spacing-2xl);
 }

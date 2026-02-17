@@ -1,5 +1,6 @@
 /**
- * Sidebar – Eclipsis style
+ * Sidebar – Flock Ramp style
+ * Gradient cards with colored icons
  */
 
 .sidebar {
@@ -21,9 +22,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-secondary);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   cursor: pointer;
   font-size: var(--font-size-sm);
@@ -37,9 +38,56 @@
 .quick-access button:hover,
 .quick-access-btn-link:hover {
   border-color: var(--color-border-accent);
-  background: var(--color-hover);
+  box-shadow: var(--glow-purple);
+}
+
+.quick-access-btn-link.active {
+  border-color: var(--color-border-accent);
+  background: var(--gradient-purple);
+  box-shadow: var(--glow-purple);
+}
+
+.quick-access .icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
 }
 
 .quick-access .icon {
   font-size: var(--font-size-xl);
+}
+
+/* Colored icon backgrounds (crypto card style) */
+.quick-access [data-icon="home"] .icon-wrap {
+  background: rgba(99, 102, 241, 0.25);
+  color: var(--color-accent-primary);
+}
+
+.quick-access [data-icon="dashboard"] .icon-wrap {
+  background: rgba(98, 126, 234, 0.25);
+  color: var(--color-ethereum);
+}
+
+.quick-access [data-icon="query"] .icon-wrap {
+  background: rgba(99, 102, 241, 0.25);
+  color: var(--color-accent-primary);
+}
+
+.quick-access [data-icon="query-builder"] .icon-wrap {
+  background: rgba(139, 92, 246, 0.25);
+  color: var(--color-accent-secondary);
+}
+
+.quick-access [data-icon="qa"] .icon-wrap {
+  background: rgba(16, 185, 129, 0.25);
+  color: var(--color-success);
+}
+
+.quick-access [data-icon="confluence"] .icon-wrap {
+  background: rgba(236, 72, 153, 0.25);
+  color: var(--color-accent-pink);
 }

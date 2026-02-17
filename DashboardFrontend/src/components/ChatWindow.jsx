@@ -70,7 +70,7 @@ const ChatWindow = () => {
   }, []);
 
   const handleSendMessage = useCallback(async (text) => {
-    if (!text.trim() || !chatAvailable) return;
+    if (!text.trim()) return;
 
     const userMessage = { text: text.trim(), sender: 'user', timestamp: Date.now() };
     setMessages((prev) => {
@@ -93,7 +93,7 @@ const ChatWindow = () => {
     } finally {
       setLoading(false);
     }
-  }, [chatAvailable, messages, showToast]);
+  }, [messages, showToast]);
 
   const handleUseSuggestedQuery = useCallback((queryValue) => {
     const now = Date.now();
@@ -144,7 +144,7 @@ const ChatWindow = () => {
       </div>
       <ChatInput
         onSend={handleSendMessage}
-        disabled={!chatAvailable || loading}
+        disabled={loading}
       />
       <ChatSettingsModal
         isOpen={settingsOpen}

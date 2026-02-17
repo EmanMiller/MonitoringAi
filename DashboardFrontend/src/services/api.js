@@ -150,3 +150,51 @@ export const postChat = async (message, history = []) => {
   });
   return data;
 };
+
+/**
+ * Query Builder AI: natural language → Sumo Logic query + explanation.
+ * Body: { userInput, context? }. Returns { query, explanation, confidence }.
+ */
+export const generateQuery = async (userInput, context = '') => {
+  const { data } = await api.post('/api/Chat/generate-query', { userInput, context });
+  return data;
+};
+
+/**
+ * Query Builder AI: get 3–5 optimization suggestions for a query.
+ * Body: { query, performance? }. Returns { suggestions: [{ suggestion, impact, reason }] }.
+ */
+export const optimizeQuery = async (query, performance = '') => {
+  const { data } = await api.post('/api/Chat/optimize-query', { query, performance });
+  return data;
+};
+
+/**
+ * Query Builder AI: plain English explanation of a Sumo Logic query.
+ * Body: { query }. Returns { explanation, confidence }.
+ */
+export const explainQuery = async (query) => {
+  const { data } = await api.post('/api/Chat/explain-query', { query });
+  return data;
+};
+
+/**
+ * Run a Sumo Logic query and return results.
+ * Backend (Gary) implements execution; stub returns mock until ready.
+ */
+export const runQuery = async (query, timeRange = '1h', limit = 100) => {
+  const { data } = await api.post('/api/Query/run', {
+    query,
+    timeRange,
+    limit,
+  }).catch(() => ({
+    data: {
+      rows: [],
+      columns: [],
+      rowCount: 0,
+      executionTimeMs: 0,
+      message: 'Query execution not yet implemented. Backend will provide results.',
+    },
+  }));
+  return data;
+};
