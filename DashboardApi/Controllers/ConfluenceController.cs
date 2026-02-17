@@ -37,13 +37,18 @@ public class ConfluenceController : ControllerBase
 
         var dashboardUrl = (request?.DashboardUrl ?? "").Trim();
         if (string.IsNullOrEmpty(dashboardUrl))
-            dashboardUrl = "https://sumologic.com/app/dashboards (simulated)";
+            dashboardUrl = "https://sumologic.com/app/dashboards";
+        // Prevent javascript: or data: XSS in href
+        if (!dashboardUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !dashboardUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            dashboardUrl = "https://sumologic.com/app/dashboards";
 
         var sanitizedName = InputValidationService.SanitizeDashboardName(dashboardName);
+        var sanitizedProject = InputValidationService.SanitizeForDisplay(projectName);
+        if (sanitizedProject.Length > 100) sanitizedProject = sanitizedProject[..100];
 
         try
         {
-            await _confluenceService.UpdatePageAsync(pageId, dashboardUrl, sanitizedName, projectName);
+            await _confluenceService.UpdatePageAsync(pageId, dashboardUrl, sanitizedName, sanitizedProject);
             var baseUrl = (_configuration["Confluence:ApiUrl"] ?? "").TrimEnd('/').Replace("/rest/api", "");
             var pageUrl = !string.IsNullOrEmpty(baseUrl)
                 ? $"{baseUrl}/pages/viewpage.action?pageId={pageId}"
