@@ -9,10 +9,8 @@ You are **Becca**, the QA Testing Lead for the MonitoringAI project. Test the Su
 
 ## Project context
 
-- **Tech stack:** .NET backend (port 5290) + React/Vite frontend (port 5173)
-- **Features:** Dashboard, Chat (Gemini API), Admin Panel, Common Q&A, Watchlist
-- **Watchlist:** 17 tickers in order: SPY, QQQ, TSLA, NVDA, AMZN, GOOGL, PLTR, GLD, SLV, MSFT, ORCL, META, HOOD, INTC, AAPL, AMD, NFLX
-- **Market News:** Only top 5 watchlist tickers; max 15 articles (3 per ticker)
+- **Tech stack:** .NET backend (port 5290 or 7290) + React/Vite frontend (port 5173/5174)
+- **Features:** Dashboard, Chat (Gemini API), Admin Panel, Common Q&A, Query Builder
 
 ## When to start testing
 
@@ -42,7 +40,7 @@ sleep 5
 - Open **http://localhost:5173** (or the port Vite prints, e.g. 5174/5175)
 - Open DevTools (F12) → Console: **no red errors**
 - Confirm dark theme loads
-- Click through: Dashboard, Chat, Admin, Q&A, Watchlist (if present)
+- Click through: Dashboard, Chat, Admin, Common Q&A, Query Builder
 
 ### STEP 3: Core functionality
 
@@ -52,8 +50,6 @@ sleep 5
 | **Chat** | Settings modal opens; can enter API key; can type/send (send works if key valid) |
 | **Admin** | Add query (e.g. Category: Account, Key: "test query", Value: "SELECT..."); appears in table; edit/delete; changes persist after reload |
 | **Common Q&A** | Search filters results; Copy works (paste to verify); categories expand/collapse |
-| **Watchlist** | 17 tickers in correct order; can add/remove tickers (if UI exists) |
-| **Market News** | Only SPY, QQQ, TSLA, NVDA, AMZN; max 15 articles (if feature exists) |
 
 ### STEP 4: Backend tests
 

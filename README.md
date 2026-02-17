@@ -63,7 +63,9 @@ cd DashboardFrontend && npm install && cd ..
 
 ### 2. Configure
 
-Copy `.env.example` (or create `.env`) in `DashboardApi/` and `DashboardFrontend/`:
+Copy `.env.example` to `.env` at the repo root for the Dan watcher (`npm run watch:dan`, `npm run dev:all`). Fill in `GITHUB_USERNAME`, `GITHUB_EMAIL`, and `GITHUB_TOKEN`. Never commit `.env`.
+
+Also copy `.env.example` (or create `.env`) in `DashboardApi/` and `DashboardFrontend/`:
 
 - **GEMINI_API_KEY** — Your Google Gemini API key
 - **ConnectionStrings:DefaultConnection** — SQLite (`Data Source=monitoring.db`) or PostgreSQL
@@ -101,7 +103,9 @@ cd DashboardFrontend && npm run build
 | GEMINI_API_KEY | API, Frontend | Google Gemini for chat |
 | VITE_API_URL | Frontend .env | API base URL (e.g. `http://localhost:5290`) |
 | ConnectionStrings:DefaultConnection | API appsettings | SQLite or PostgreSQL |
-| JWT:SecretKey | API appsettings | JWT signing key (use Secrets in prod) |
+| JWT_SECRET or Jwt__Secret | Env (production) | JWT signing key — **required in prod**; appsettings value is dev-only placeholder |
+
+See `DashboardApi/SETUP.md` for JWT secret configuration details.
 
 See `DashboardApi/README_DATABASE.md` for database setup.
 

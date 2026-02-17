@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using DashboardApi.Configuration;
+using DashboardApi.Middleware;
 
 // Load .env from project or repo root so GEMINI_API_KEY etc. are available
 LoadEnvFile();
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuration and services
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddApplicationServices();
-builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddSecurityServices();
 
@@ -19,6 +20,7 @@ await app.EnsureCreatedAndSeedAsync();
 
 app.UseHttpsRedirection();
 app.UseCors(CorsConfiguration.PolicyName);
+app.UseMiddleware<JwtCookieMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSecurityHeaders();

@@ -341,11 +341,16 @@ const WizardStep3 = ({ useDefaults, setUseDefaults, variables, setVariables }) =
   </div>
 );
 
-const ProcessingView = ({ status }) => (
+const ProcessingView = ({ status, dashboardUrl }) => (
   <div className="processing-view">
-    <h3>AI Assistant at Work...</h3>
+    <h3>{dashboardUrl ? 'Dashboard Ready' : 'AI Assistant at Work...'}</h3>
     <p>{status}</p>
-    <div className="spinner"></div>
+    {dashboardUrl && (
+      <p>
+        <a href={dashboardUrl} target="_blank" rel="noopener noreferrer">View Dashboard</a>
+      </p>
+    )}
+    {!dashboardUrl && <div className="spinner"></div>}
   </div>
 );
 
@@ -382,6 +387,7 @@ const DashboardCreatorWizard = ({ isOpen, onClose }) => {
   const [customSelections, setCustomSelections] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [successUrl, setSuccessUrl] = useState(null);
 
   const selectedMetricsCount =
     Object.values(defaults).filter(Boolean).length + Object.keys(customSelections).length;
@@ -405,6 +411,7 @@ const DashboardCreatorWizard = ({ isOpen, onClose }) => {
       setCustomSelections({});
       setIsGenerating(false);
       setStatusMessage('');
+      setSuccessUrl(null);
     }
   }, [isOpen]);
 
@@ -431,14 +438,14 @@ const DashboardCreatorWizard = ({ isOpen, onClose }) => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setStatusMessage('📝 Updating Confluence Page...');
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStatusMessage(
-        `✅ Dashboard Live! <a href="${dashboardUrl}" target="_blank" rel="noopener noreferrer">View Dashboard</a>`
-      );
+      setStatusMessage('✅ Dashboard Live!');
+      setSuccessUrl(dashboardUrl);
     } catch (error) {
       const err = error.response?.data;
       const errorMessage =
         (typeof err === 'object' && err?.details) || (typeof err === 'string' ? err : err?.message) || error.message;
       setStatusMessage(`❌ Error: ${errorMessage}. Please try again.`);
+      setSuccessUrl(null);
     }
   };
 
@@ -478,7 +485,7 @@ const DashboardCreatorWizard = ({ isOpen, onClose }) => {
         </div>
         <div className="modal-body">
           {isGenerating ? (
-            <ProcessingView status={statusMessage} />
+            <ProcessingView status={statusMessage} dashboardUrl={successUrl} />
           ) : (
             <>
               {step === 1 && (

@@ -1,5 +1,47 @@
 # DashboardApi Setup
 
+## JWT Secret (required for production)
+
+The JWT signing secret is used for authentication tokens. **Never deploy to production with the placeholder value.**
+
+### Development
+
+`appsettings.json` and `appsettings.Development.json` contain placeholder values (dev-only). These are acceptable for local development.
+
+### Production
+
+**You must set the JWT secret via environment variable or Secrets Manager.** The app will refuse to start in Production if the secret is missing or is a known placeholder.
+
+**Environment variables** (either works):
+
+- `JWT_SECRET` — recommended
+- `Jwt__Secret` — alternative (ASP.NET config binding)
+
+**Requirements:**
+
+- Minimum 32 characters
+- Use a cryptographically random value (e.g. `openssl rand -base64 48`)
+- Store in AWS Secrets Manager, GCP Secret Manager, or equivalent — never commit real secrets
+
+**Example (Docker):**
+
+```bash
+docker run -e JWT_SECRET="your-strong-secret-min-32-chars" ...
+```
+
+**Example (Kubernetes secret):**
+
+```yaml
+env:
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: monitoringai-secrets
+        key: jwt-secret
+```
+
+---
+
 ## Gemini API Key (required for chat features)
 
 The following features require a valid **Google Gemini API key**:
@@ -33,5 +75,5 @@ Chat messages (user + assistant) are persisted to the `ChatHistory` table after 
 **Requirements:**
 
 - **Authenticated users only** — Logging is skipped for anonymous/unauthenticated requests (no valid UserId).
-- **Content** — Stored content is sanitized and truncated to 4096 characters per message.
+- **Content** — Stored content is sanitized, PII stripped, and truncated to 4096 characters per message.
 - **ConversationId** — Optional. Requests may include `conversationId` (Guid) to group messages; if omitted, the backend generates a new ID per exchange.

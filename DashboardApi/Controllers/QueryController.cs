@@ -48,6 +48,26 @@ public class QueryController : ControllerBase
             return StatusCode(500, new { details = ex.Message });
         }
     }
+
+    [HttpPost("run")]
+    public IActionResult Run([FromBody] QueryRunRequest request)
+    {
+        return StatusCode(501, new
+        {
+            message = "Query execution not yet implemented. Sumo Logic integration pending.",
+            rows = Array.Empty<object>(),
+            columns = Array.Empty<string>(),
+            rowCount = 0,
+            executionTimeMs = 0
+        });
+    }
+}
+
+public class QueryRunRequest
+{
+    public string? Query { get; set; }
+    public string? TimeRange { get; set; }
+    public int? Limit { get; set; }
 }
 
 public class QueryRequest

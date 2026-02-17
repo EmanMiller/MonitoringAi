@@ -13,7 +13,7 @@ const Header = ({ backTo, backLabel = 'Back to Dashboard' }) => {
           </Link>
         )}
         <Link to="/" className="header-logo-link">
-          <h2>Crate&Barrel</h2>
+          <h2>MonitoringAI</h2>
         </Link>
         <span>Quick Dashboard, Queries, & Confluence</span>
       </div>
