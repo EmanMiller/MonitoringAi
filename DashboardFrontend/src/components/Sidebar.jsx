@@ -23,12 +23,6 @@ const Sidebar = () => {
             <span>Create Dashboard</span>
           </button>
         )}
-        {user && (
-          <NavLink to="/admin" className={({ isActive }) => `quick-access-btn-link ${isActive ? 'active' : ''}`} data-icon="admin">
-            <span className="icon-wrap"><span className="icon">⚙️</span></span>
-            <span>Admin</span>
-          </NavLink>
-        )}
         <NavLink to="/common-qa" className={({ isActive }) => `quick-access-btn-link ${isActive ? 'active' : ''}`} data-icon="qa">
           <span className="icon-wrap"><span className="icon">💬</span></span>
           <span>Common Q&A</span>

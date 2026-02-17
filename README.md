@@ -9,8 +9,7 @@ MonitoringAI combines a React frontend (Vite) with a .NET 10 API to provide:
 - **AI Chat** — Gemini-powered conversation for log queries, dashboards, and guidance
 - **Common Q&A** — Search answers grounded in Confluence documentation (RAG planned)
 - **Dashboard Wizard** — Create and publish dashboards to Confluence
-- **Query Library** — Saved queries, templates, and log mappings
-- **Admin Panel** — User management, roles, and settings
+- **Query Library** — Saved queries, templates, and log mappings (API used by Common Q&A, Query Builder)
 - **Auth** — JWT-based login with role-based access (Admin, Viewer, etc.)
 
 ## Highlights
@@ -27,7 +26,7 @@ MonitoringAI combines a React frontend (Vite) with a .NET 10 API to provide:
 MonitoringAi/
 ├── DashboardFrontend/     # React + Vite SPA
 │   ├── src/
-│   │   ├── components/    # ChatWindow, CommonQAPage, QueryBuilder, AdminPanel, etc.
+│   │   ├── components/    # ChatWindow, CommonQAPage, QueryBuilder, etc.
 │   │   ├── context/       # AuthContext, DashboardFlowContext
 │   │   ├── services/      # api, geminiService
 │   │   └── styles/

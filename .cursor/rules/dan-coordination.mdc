@@ -106,10 +106,11 @@ It respects `.dan-hold` (no push) and `.dan-approved` (allow push on `main`). Tr
 
 ## Completed tasks
 
+- Admin section removed (route, Sidebar link, AdminPanel, AdminView, QueryLibraryView) — Niklaus
 - @mentions updated to file path pattern (MonitoringAi/.cursor/rules/*.mdc) across rules, README_DATABASE, dan-watcher
 - Auth: password verification, JWT/cookies, `/me` fix (Gary)
 - Query/run endpoint (501), CORS 5174 (Gary)
-- Admin route, Sidebar link, AdminView.jsx (Niklaus)
+- Admin route, Sidebar link, AdminView.jsx (Niklaus) — later removed
 - Wizard success link clickable, Header → MonitoringAI (Niklaus)
 - JWT secret from env in prod (Paul)
 - Root `.env.example`, AGENTS.md, Becca rules, SETUP.md (Rachel, Dan)

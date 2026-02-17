@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
-import AdminPanel from './components/AdminPanel';
 import ChatWindow from './components/ChatWindow';
 import CommonQAPage from './components/CommonQAPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -18,7 +17,6 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route index element={<ChatWindow />} />
-            <Route path="admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
             <Route path="common-qa" element={<CommonQAPage />} />
           </Route>
         </Routes>
