@@ -6,8 +6,16 @@ import Toast from './Toast';
 import { getChatStatus, postChat, postDashboardFlow, createDashboardFromWizard, matchQuery } from '../services/api';
 import { useDashboardFlow } from '../context/DashboardFlowContext';
 
-const NO_KEY_MESSAGE = 'Chat is not configured. Ask your administrator to set the Gemini API key on the server.';
-const WELCOME_MESSAGE = 'How can I help you today?';
+const NO_KEY_MESSAGE = 'Chat is not configured. Replace EMAN_GOOGLE_API_KEY_HERE with your Google Gemini API key in .env or appsettings (Gemini:ApiKey).';
+
+const INTRO_MESSAGES = [
+  { text: "Hi! I can help you with Sumo Logic queries and dashboards.", sender: 'assistant' },
+  { text: "Try: Create a dashboard — I'll guide you through setup.", sender: 'assistant' },
+  { text: "Or ask: I need a query for login tracking — I'll find a matching query.", sender: 'assistant' },
+  { text: "You can also ask questions about your logs or get query explanations.", sender: 'assistant' },
+];
+
+const isIntroMessage = (m) => INTRO_MESSAGES.some((intro) => m.text === intro.text);
 
 function getChatErrorMessage(err) {
   if (!err) return 'Something went wrong.';
@@ -16,7 +24,7 @@ function getChatErrorMessage(err) {
   if (status === 429 || details?.toLowerCase?.().includes('too many'))
     return 'Too many requests. Please wait.';
   if (status === 503 || details?.toLowerCase?.().includes('api key') || details?.toLowerCase?.().includes('not configured'))
-    return 'Gemini unavailable. Check API key.';
+    return 'CrateBot unavailable. Check API key.';
   if (status === 401 || status === 403)
     return 'API key invalid. Check settings.';
   if (err.message === 'Network Error' || err.code === 'ERR_NETWORK')
@@ -63,14 +71,20 @@ const ChatWindow = () => {
   useEffect(() => {
     if (chatAvailable) {
       setMessages((prev) => {
-        if (prev.length === 0 || (prev.length === 1 && prev[0].text === NO_KEY_MESSAGE))
-          return [{ text: WELCOME_MESSAGE, sender: 'assistant' }];
+        const isEmpty = prev.length === 0;
+        const onlyNoKey = prev.length === 1 && prev[0].text === NO_KEY_MESSAGE;
+        const onlyOldWelcome = prev.length === 1 && prev[0].text === 'How can I help you today?';
+        if (isEmpty || onlyNoKey || onlyOldWelcome)
+          return INTRO_MESSAGES.map((m) => ({ ...m, timestamp: Date.now() }));
         return prev;
       });
     } else {
       setMessages((prev) => {
-        if (prev.length === 0 || (prev.length === 1 && prev[0].text === WELCOME_MESSAGE))
-          return [{ text: NO_KEY_MESSAGE, sender: 'system' }];
+        const isEmpty = prev.length === 0;
+        const onlyIntros = prev.every((m) => isIntroMessage(m));
+        const onlyOldWelcome = prev.length === 1 && prev[0].text === 'How can I help you today?';
+        if (isEmpty || onlyIntros || onlyOldWelcome)
+          return [{ text: NO_KEY_MESSAGE, sender: 'system', timestamp: Date.now() }];
         return prev;
       });
     }
@@ -85,7 +99,7 @@ const ChatWindow = () => {
 
     const userMessage = { text: text.trim(), sender: 'user', timestamp: Date.now() };
     setMessages((prev) => {
-      const withoutPlaceholder = prev.filter((m) => m.text !== NO_KEY_MESSAGE && m.text !== WELCOME_MESSAGE);
+      const withoutPlaceholder = prev.filter((m) => m.text !== NO_KEY_MESSAGE && !isIntroMessage(m));
       return [...withoutPlaceholder, userMessage];
     });
     setLoading(true);
@@ -203,7 +217,7 @@ const ChatWindow = () => {
       timestamp: now,
     };
     setMessages((prev) => {
-      const withoutPlaceholder = prev.filter((m) => m.text !== NO_KEY_MESSAGE && m.text !== WELCOME_MESSAGE);
+      const withoutPlaceholder = prev.filter((m) => m.text !== NO_KEY_MESSAGE && !isIntroMessage(m));
       return [...withoutPlaceholder, userMessage, assistantMessage];
     });
   }, []);
@@ -232,19 +246,25 @@ const ChatWindow = () => {
         </div>
       </div>
       <div className="message-list">
-        {displayMessages.map((message, index) => (
-          <Message
-            key={`${index}-${message.text?.slice(0, 20)}`}
-            message={message}
-            isActiveStep={!loading && message === lastWithStepData}
-            onOptionSelect={(val) => handleSendMessage(val)}
-            onInputSubmit={(val) => handleSendMessage(val)}
-          />
-        ))}
+        {displayMessages.map((message, index) => {
+          const introIdx = isIntroMessage(message) ? index : undefined;
+          const isFirstInSequence = index === 0 || displayMessages[index - 1]?.sender !== message.sender;
+          return (
+            <Message
+              key={`${index}-${message.text?.slice(0, 20)}`}
+              message={message}
+              isActiveStep={!loading && message === lastWithStepData}
+              onOptionSelect={(val) => handleSendMessage(val)}
+              onInputSubmit={(val) => handleSendMessage(val)}
+              introIndex={introIdx}
+              showTimestamp={isFirstInSequence}
+            />
+          );
+        })}
         {loading && (
           <div className="message assistant typing-indicator">
-            <div className="message-sender">Gemini</div>
-            <div className="message-content typing-content">Gemini is thinking...</div>
+            <div className="message-sender">CrateBot</div>
+            <div className="message-content typing-content">CrateBot is thinking...</div>
           </div>
         )}
       </div>

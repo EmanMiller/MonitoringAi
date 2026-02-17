@@ -15,14 +15,16 @@ public class ChatController : ControllerBase
     private readonly QueryAssistantAiService _queryAi;
     private readonly DashboardFlowService _dashboardFlow;
     private readonly QueryMatchService _queryMatch;
+    private readonly ApplicationDbContext _db;
 
-    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow, QueryMatchService queryMatch)
+    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow, QueryMatchService queryMatch, ApplicationDbContext db)
     {
         _chatService = chatService;
         _rateLimit = rateLimit;
         _queryAi = queryAi;
         _dashboardFlow = dashboardFlow;
         _queryMatch = queryMatch;
+        _db = db;
     }
 
     /// <summary>
@@ -55,13 +57,15 @@ public class ChatController : ControllerBase
             return StatusCode(429, new { details = "Too many requests. Please wait.", retryAfterSeconds = retryAfter });
         }
 
-        var history = NormalizeHistory(request!.History);
         var sanitized = InputValidationService.SanitizeChatMessage(request.Message);
+        var redacted = InputValidationService.StripPii(sanitized);
+        var history = NormalizeHistory(request!.History);
 
         try
         {
-            var responseText = await _chatService.SendChatAsync(sanitized, history);
+            var responseText = await _chatService.SendChatAsync(redacted, history);
             var safeText = InputValidationService.SanitizeForDisplay(responseText);
+            await TryLogChatExchangeAsync(userId, request!.ConversationId, redacted, safeText);
             return Ok(new ChatResponse { Response = safeText });
         }
         catch (InvalidOperationException ex)
@@ -82,7 +86,7 @@ public class ChatController : ControllerBase
         {
             var sender = (h.Sender ?? "").Trim().ToLowerInvariant();
             if (sender != "user" && sender != "assistant") sender = "user";
-            var text = InputValidationService.SanitizeChatMessage(h.Text);
+            var text = InputValidationService.StripPii(InputValidationService.SanitizeChatMessage(h.Text));
             if (string.IsNullOrEmpty(text)) continue;
             list.Add(new ChatTurn { Sender = sender, Text = text });
         }
@@ -108,7 +112,8 @@ public class ChatController : ControllerBase
         }
 
         var sanitized = InputValidationService.SanitizeMatchQueryInput(request!.UserInput);
-        var result = await _queryMatch.MatchQueryAsync(sanitized);
+        var redacted = InputValidationService.StripPii(sanitized);
+        var result = await _queryMatch.MatchQueryAsync(redacted);
         var safe = new QueryMatchResult
         {
             Matched = result.Matched,
@@ -118,6 +123,10 @@ public class ChatController : ControllerBase
             Confidence = result.Confidence,
             Message = result.Message != null ? InputValidationService.SanitizeForDisplay(result.Message) : null
         };
+        var assistantContent = result.Matched
+            ? $"Query: {result.Query}\n\n{result.Explanation}"
+            : $"No match: {result.Message}";
+        await TryLogChatExchangeAsync(userId, request!.ConversationId, redacted, assistantContent);
         return Ok(safe);
     }
 
@@ -128,7 +137,7 @@ public class ChatController : ControllerBase
     public async Task<ActionResult<GenerateQueryResponse>> GenerateQuery([FromBody] GenerateQueryRequest request)
     {
         if (!_chatService.IsConfigured())
-            return StatusCode(503, new { error = "Gemini API not configured." });
+            return StatusCode(503, new { details = "Replace EMAN_GOOGLE_API_KEY_HERE with your Gemini API key in .env or appsettings." });
         var (allowed, retryAfter) = _rateLimit.TryConsume(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anon");
         if (!allowed)
         {
@@ -140,9 +149,10 @@ public class ChatController : ControllerBase
             return BadRequest(new { details = "userInput is required." });
         if (userInput.Length > 2000)
             return BadRequest(new { details = "userInput must be at most 2000 characters." });
+        var redactedInput = InputValidationService.StripPii(userInput);
         try
         {
-            var result = await _queryAi.GenerateQueryAsync(userInput, request?.Context, HttpContext.RequestAborted);
+            var result = await _queryAi.GenerateQueryAsync(redactedInput, request?.Context, HttpContext.RequestAborted);
             return Ok(new GenerateQueryResponse
             {
                 Query = result.Query,
@@ -163,7 +173,7 @@ public class ChatController : ControllerBase
     public async Task<ActionResult<OptimizeQueryResponse>> OptimizeQuery([FromBody] OptimizeQueryRequest request)
     {
         if (!_chatService.IsConfigured())
-            return StatusCode(503, new { error = "Gemini API not configured." });
+            return StatusCode(503, new { details = "Replace EMAN_GOOGLE_API_KEY_HERE with your Gemini API key in .env or appsettings." });
         var (allowed, retryAfter) = _rateLimit.TryConsume(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anon");
         if (!allowed)
         {
@@ -175,9 +185,10 @@ public class ChatController : ControllerBase
             return BadRequest(new { details = "query is required." });
         if (query.Length > 8000)
             return BadRequest(new { details = "query must be at most 8000 characters." });
+        var redactedQuery = InputValidationService.StripPii(query);
         try
         {
-            var result = await _queryAi.OptimizeQueryAsync(query, request?.Performance, HttpContext.RequestAborted);
+            var result = await _queryAi.OptimizeQueryAsync(redactedQuery, request?.Performance, HttpContext.RequestAborted);
             var dtos = result.Suggestions.Select(s => new QuerySuggestionDto { Suggestion = s.Suggestion, Impact = s.Impact, Reason = s.Reason }).ToList();
             return Ok(new OptimizeQueryResponse { Suggestions = dtos });
         }
@@ -194,7 +205,7 @@ public class ChatController : ControllerBase
     public async Task<ActionResult<ExplainQueryResponse>> ExplainQuery([FromBody] ExplainQueryRequest request)
     {
         if (!_chatService.IsConfigured())
-            return StatusCode(503, new { error = "Gemini API not configured." });
+            return StatusCode(503, new { details = "Replace EMAN_GOOGLE_API_KEY_HERE with your Gemini API key in .env or appsettings." });
         var (allowed, retryAfter) = _rateLimit.TryConsume(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anon");
         if (!allowed)
         {
@@ -206,9 +217,10 @@ public class ChatController : ControllerBase
             return BadRequest(new { details = "query is required." });
         if (query.Length > 8000)
             return BadRequest(new { details = "query must be at most 8000 characters." });
+        var redactedQuery = InputValidationService.StripPii(query);
         try
         {
-            var result = await _queryAi.ExplainQueryAsync(query, HttpContext.RequestAborted);
+            var result = await _queryAi.ExplainQueryAsync(redactedQuery, HttpContext.RequestAborted);
             return Ok(new ExplainQueryResponse { Explanation = result.Explanation, Confidence = result.Confidence });
         }
         catch (InvalidOperationException ex)
@@ -224,7 +236,7 @@ public class ChatController : ControllerBase
     public async Task<ActionResult<DashboardFlowResponse>> DashboardFlow([FromBody] DashboardFlowRequest request)
     {
         if (!_chatService.IsConfigured())
-            return StatusCode(503, new { error = "Gemini API not configured." });
+            return StatusCode(503, new { details = "Replace EMAN_GOOGLE_API_KEY_HERE with your Gemini API key in .env or appsettings." });
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
         var (allowed, retryAfter) = _rateLimit.TryConsume(userId);
         if (!allowed)
@@ -237,8 +249,8 @@ public class ChatController : ControllerBase
             return BadRequest(new { details = "message is required." });
         if (message.Length > 2000)
             return BadRequest(new { details = "message must be at most 2000 characters." });
-
-        var historyItems = request?.History?.Select(h => new DashboardFlowHistoryItem { Sender = h.Sender, Text = InputValidationService.SanitizeChatMessage(h.Text) }).ToList();
+        var redactedMessage = InputValidationService.StripPii(message);
+        var historyItems = request?.History?.Select(h => new DashboardFlowHistoryItem { Sender = h.Sender, Text = InputValidationService.StripPii(InputValidationService.SanitizeChatMessage(h.Text)) }).ToList();
 
         DashboardFlowContext? flowContext = null;
         if (request?.FlowContext != null)
@@ -265,7 +277,9 @@ public class ChatController : ControllerBase
 
         try
         {
-            var result = await _dashboardFlow.ProcessAsync(message, flowContext, historyItems, HttpContext.RequestAborted);
+            var result = await _dashboardFlow.ProcessAsync(redactedMessage, flowContext, historyItems, HttpContext.RequestAborted);
+            var safeResponse = InputValidationService.SanitizeForDisplay(result.ResponseText);
+            await TryLogChatExchangeAsync(userId, request!.ConversationId, redactedMessage, safeResponse);
             var stepData = result.StepData == null ? null : new DashboardStepDataDto
             {
                 Step = result.StepData.Step,
@@ -285,11 +299,47 @@ public class ChatController : ControllerBase
             return StatusCode(503, new { error = ex.Message });
         }
     }
+
+    /// <summary>Log user + assistant messages to ChatHistory. Skips if user is anonymous (no valid UserId).</summary>
+    private async Task TryLogChatExchangeAsync(string? userIdClaim, Guid? conversationIdFromRequest, string userContent, string assistantContent)
+    {
+        if (string.IsNullOrEmpty(userIdClaim) || userIdClaim == "anonymous")
+            return;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return;
+
+        var conversationId = conversationIdFromRequest ?? Guid.NewGuid();
+        var userStored = InputValidationService.TruncateForChatStorage(InputValidationService.StripPii(userContent));
+        var assistantStored = InputValidationService.TruncateForChatStorage(InputValidationService.StripPii(assistantContent));
+        var userEntry = new ChatHistory
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            ConversationId = conversationId,
+            Role = "user",
+            Content = userStored,
+            Timestamp = DateTime.UtcNow
+        };
+        var assistantEntry = new ChatHistory
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            ConversationId = conversationId,
+            Role = "assistant",
+            Content = assistantStored,
+            Timestamp = DateTime.UtcNow
+        };
+        _db.ChatHistory.Add(userEntry);
+        _db.ChatHistory.Add(assistantEntry);
+        await _db.SaveChangesAsync();
+    }
 }
 
 public class MatchQueryRequest
 {
     public string? UserInput { get; set; }
+    /// <summary>Optional. If omitted, backend generates a new conversation ID for this exchange.</summary>
+    public Guid? ConversationId { get; set; }
 }
 
 public class MatchQueryResponse
@@ -349,6 +399,8 @@ public class ChatRequest
 {
     public string? Message { get; set; }
     public List<ChatTurnDto>? History { get; set; }
+    /// <summary>Optional. If omitted, backend generates a new conversation ID for this exchange.</summary>
+    public Guid? ConversationId { get; set; }
 }
 
 public class ChatTurnDto
@@ -367,6 +419,8 @@ public class DashboardFlowRequest
     public string? Message { get; set; }
     public DashboardFlowContextDto? FlowContext { get; set; }
     public List<ChatTurnDto>? History { get; set; }
+    /// <summary>Optional. If omitted, backend generates a new conversation ID for this exchange.</summary>
+    public Guid? ConversationId { get; set; }
 }
 
 public class DashboardFlowContextDto

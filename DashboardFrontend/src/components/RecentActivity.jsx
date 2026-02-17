@@ -16,7 +16,7 @@ function RecentActivity() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    getRecentActivity(10)
+    getRecentActivity(20)
       .then((res) => {
         if (cancelled) return;
         const list = Array.isArray(res?.activities) ? res.activities : res?.Activities ?? [];

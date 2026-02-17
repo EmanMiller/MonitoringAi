@@ -1,35 +1,35 @@
 /**
- * Chat input – Flock Ramp style
- * Part of chat flex layout (no position:fixed) to avoid overlap on scroll
- * Purple glow, gradient send button
+ * Chat input – Gemini-style spacious layout
+ * Full width, large rounded box, purple gradient send button
  */
 
 .chat-input-container {
   flex-shrink: 0;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-top: 1px solid #2a2f3e;
+  background: #1a1f2e;
 }
 
 .chat-input-form {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   align-items: flex-end;
 }
 
 .chat-input-textarea {
   flex: 1;
-  background: var(--color-bg-input);
+  background: #1a1f2e;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
   color: var(--color-text-primary);
-  font-size: var(--font-size-base);
+  font-size: 16px;
+  line-height: 1.5;
   font-family: inherit;
   resize: none;
-  min-height: 52px;
+  min-height: 56px;
   max-height: 200px;
   overflow-y: auto;
   transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
@@ -51,13 +51,13 @@
 }
 
 .chat-send-button {
-  background: var(--gradient-purple);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   border: none;
   color: #ffffff;
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-md);
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,6 +74,21 @@
 .chat-send-button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .chat-input-container {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .chat-input-textarea {
+    min-height: 48px;
+    padding: 14px 16px;
+  }
+  .chat-send-button {
+    min-height: 48px;
+    width: 44px;
+    height: 44px;
+  }
 }
 
 @media (max-width: 900px) {

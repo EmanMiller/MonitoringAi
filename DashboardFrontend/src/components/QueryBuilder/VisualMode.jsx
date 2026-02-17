@@ -6,6 +6,7 @@ import {
   LIMIT_OPTIONS,
   AGG_FUNCTIONS,
   GROUP_BY_FIELDS,
+  SITE_AREAS,
 } from './queryBuilderLogic';
 
 function VisualMode({ visual, onChange }) {
@@ -31,6 +32,21 @@ function VisualMode({ visual, onChange }) {
 
   return (
     <div className="query-builder-visual">
+      <section className="qb-section">
+        <h4 className="qb-section-title">Area of site</h4>
+        <p className="qb-hint">Production logs only. Optionally narrow by area.</p>
+        <select
+          value={visual.siteArea ?? ''}
+          onChange={(e) => update('siteArea', e.target.value)}
+          className="qb-select qb-site-area"
+          aria-label="Area of site"
+        >
+          {SITE_AREAS.map((opt) => (
+            <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </section>
+
       <section className="qb-section">
         <h4 className="qb-section-title">Filters</h4>
         <div className="qb-filters">

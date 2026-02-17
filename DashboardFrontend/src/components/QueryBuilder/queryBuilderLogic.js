@@ -1,9 +1,23 @@
 /**
  * Query Builder logic: Visual config ↔ Sumo Logic query string
+ * All queries assume production (_sourceCategory=prod). Optional "Area of site" narrows to prod/{area}.
  */
 
+/** Production source category — always applied; do not expose in Filters. */
+export const PROD_SOURCE = 'prod';
+
+/** Area of site options; selection becomes _sourceCategory=prod/{value} or prod when empty. */
+export const SITE_AREAS = [
+  { value: '', label: 'All areas' },
+  { value: 'browse', label: 'Browse' },
+  { value: 'checkout', label: 'Checkout' },
+  { value: 'account', label: 'Account' },
+  { value: 'api', label: 'API' },
+  { value: 'search', label: 'Search' },
+];
+
+/** Filter fields only; _sourceCategory is fixed to production + site area. */
 export const FIELDS = [
-  { value: '_sourceCategory', label: '_sourceCategory' },
   { value: 'status', label: 'status' },
   { value: 'error', label: 'error' },
   { value: 'user_id', label: 'user_id' },
@@ -62,7 +76,10 @@ function escapeValue(v, op) {
 }
 
 export function visualToQuery(visual) {
-  const parts = ['*'];
+  const sourceCategory = visual.siteArea
+    ? `${PROD_SOURCE}/${visual.siteArea}`
+    : PROD_SOURCE;
+  const parts = [`_sourceCategory=${sourceCategory}`];
   if (visual.filters?.length) {
     const whereClauses = visual.filters
       .filter((f) => f.field && f.operator && (f.value !== '' || ['=', '!='].includes(f.operator)))
@@ -93,6 +110,7 @@ export function visualToQuery(visual) {
 
 export function parseQueryToVisual(query) {
   const defaultVisual = {
+    siteArea: '',
     filters: [{ field: '', operator: '=', value: '' }],
     groupBy: '',
     aggFunction: 'count',
@@ -104,6 +122,9 @@ export function parseQueryToVisual(query) {
   };
   if (!query || !query.trim()) return defaultVisual;
   const q = query.trim();
+  let siteArea = '';
+  const prodAreaMatch = q.match(/^_sourceCategory=prod\/(\w+)/i);
+  if (prodAreaMatch) siteArea = prodAreaMatch[1].toLowerCase();
   const filters = [];
   let groupBy = '';
   let aggFunction = 'count';
@@ -142,6 +163,7 @@ export function parseQueryToVisual(query) {
   }
 
   return {
+    siteArea,
     filters,
     groupBy,
     aggFunction,
@@ -163,10 +185,10 @@ export const TEMPLATES = [
 ];
 
 export const TEMPLATE_QUERIES = {
-  errors: '* | where level="error" or status="error" or status_code>=500 | count by _sourceCategory | limit 100',
-  'api-perf': '* | where response_time > 0 | avg(response_time) by _sourceHost | limit 100',
-  logins: '* | where method="POST" and path matches ".*login.*" | count by user_id | limit 100',
-  'slow-queries': '* | where response_time > 1000 | count by _sourceCategory | limit 100',
-  security: '* | where status matches ".*denied|failed|unauthorized.*" | count by _sourceCategory | limit 100',
-  'status-codes': '* | count by status_code | limit 100',
+  errors: '_sourceCategory=prod | where level="error" or status="error" or status_code>=500 | count by status | limit 100',
+  'api-perf': '_sourceCategory=prod | where response_time > 0 | avg(response_time) by _sourceHost | limit 100',
+  logins: '_sourceCategory=prod/account | where method="POST" and path matches ".*login.*" | count by user_id | limit 100',
+  'slow-queries': '_sourceCategory=prod | where response_time > 1000 | count by _sourceHost | limit 100',
+  security: '_sourceCategory=prod | where status matches ".*denied|failed|unauthorized.*" | count by status | limit 100',
+  'status-codes': '_sourceCategory=prod | count by status_code | limit 100',
 };

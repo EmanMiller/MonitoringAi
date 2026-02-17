@@ -35,10 +35,11 @@ public class QueryController : ControllerBase
         }
 
         var sanitized = InputValidationService.SanitizeChatMessage(request!.Message);
+        var redacted = InputValidationService.StripPii(sanitized);
         try
         {
-            var queryText = await _queryAssistant.GetSumoQueryAsync(sanitized);
-            var label = sanitized.Length > 50 ? sanitized[..47] + "..." : sanitized;
+            var queryText = await _queryAssistant.GetSumoQueryAsync(redacted);
+            var label = redacted.Length > 50 ? redacted[..47] + "..." : redacted;
             _activityService.LogActivity("query_run", $"Query '{label}' ran successfully", userId);
             return Ok(new QueryResponse { QueryText = queryText });
         }

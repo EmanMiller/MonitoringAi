@@ -12,7 +12,9 @@ const Header = ({ backTo, backLabel = 'Back to Dashboard' }) => {
             ← {backLabel}
           </Link>
         )}
-        <h2>Crate&Barrel</h2>
+        <Link to="/" className="header-logo-link">
+          <h2>Crate&Barrel</h2>
+        </Link>
         <span>Quick Dashboard, Queries, & Confluence</span>
       </div>
       <div className="header-right">

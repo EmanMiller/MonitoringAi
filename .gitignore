@@ -17,6 +17,5 @@ node_modules/
 QA_REPORT.md
 QA_SIGN_OFF_REPORT.md
 RACHEL_REVIEW.md
-TASK_BREAKDOWN_*.md
-TASK_CARDS.md
+task-cards/
 docs/BECCA_CARD*_E2E_CHECKLIST.md

@@ -19,6 +19,7 @@ const MODES = ['visual', 'code', 'preview'];
 function QueryBuilder() {
   const [mode, setMode] = useState('visual');
   const [visual, setVisual] = useState({
+    siteArea: '',
     filters: [{ field: '', operator: '=', value: '' }],
     groupBy: '',
     aggFunction: 'count',
@@ -28,7 +29,7 @@ function QueryBuilder() {
     timeEnd: null,
     limit: 100,
   });
-  const [query, setQuery] = useState('* | limit 100');
+  const [query, setQuery] = useState('_sourceCategory=prod | limit 100');
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -136,6 +137,7 @@ function QueryBuilder() {
 
   const handleClear = () => {
     setVisual({
+      siteArea: '',
       filters: [{ field: '', operator: '=', value: '' }],
       groupBy: '',
       aggFunction: 'count',
@@ -145,7 +147,7 @@ function QueryBuilder() {
       timeEnd: null,
       limit: 100,
     });
-    setQuery('* | limit 100');
+    setQuery('_sourceCategory=prod | limit 100');
     setExplanation('');
     setError(null);
     setResults({ rows: [], columns: [], rowCount: 0, executionTimeMs: 0 });

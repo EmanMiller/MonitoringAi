@@ -18,6 +18,7 @@ public static class InputValidationService
     private const int ChatMessageMaxLength = 2000;
     private const int SearchQueryMaxLength = 100;
     private const int MatchQueryUserInputMaxLength = 500;
+    private const int ChatHistoryContentMaxLength = 4096;
 
     public static (bool Valid, string? Error) ValidateDashboardName(string? name)
     {
@@ -90,6 +91,13 @@ public static class InputValidationService
             return (false, $"userInput must be at most {MatchQueryUserInputMaxLength} characters.");
         if (ContainsScriptTags(userInput)) return (false, "userInput contains invalid content.");
         return (true, null);
+    }
+
+    /// <summary>Truncate content for ChatHistory storage (max 4096 chars).</summary>
+    public static string TruncateForChatStorage(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        return input.Length <= ChatHistoryContentMaxLength ? input : input[..ChatHistoryContentMaxLength];
     }
 
     /// <summary>Sanitize match-query user input (trim, strip scripts, cap length).</summary>
@@ -215,5 +223,33 @@ public static class InputValidationService
             s = Regex.Replace(s, tag, "", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
         s = Regex.Replace(s, @"<[^>]*>", "", RegexOptions.None, TimeSpan.FromMilliseconds(100));
         return s.Trim();
+    }
+
+    // --- PII redaction (for LLM and storage). Apply after sanitization. ---
+    private static readonly Regex PiiEmail = new(@"[\w.+-]+@[\w.-]+\.\w+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiPhone = new(@"(\+?1?[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiSsn = new(@"\b\d{3}-\d{2}-\d{4}\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiCreditCard = new(@"\b(?:\d{4}[-.\s]?){3}\d{4}\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiIp = new(@"\b(?:\d{1,3}\.){3}\d{1,3}\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiEmployeeId = new(@"\bE-\d{4,}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex PiiUserId = new(@"\buser_[a-zA-Z0-9_-]+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+
+    /// <summary>
+    /// Redact PII from text before sending to LLM or storing in ChatHistory.
+    /// Patterns: email, phone, SSN, credit card, IP, employee ID (E-12345), user_xxx.
+    /// Call after SanitizeChatMessage (or equivalent). Use returned string for Gemini and DB.
+    /// </summary>
+    public static string StripPii(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        var s = input;
+        s = PiiEmail.Replace(s, "[EMAIL_REDACTED]");
+        s = PiiPhone.Replace(s, "[PHONE_REDACTED]");
+        s = PiiSsn.Replace(s, "[SSN_REDACTED]");
+        s = PiiCreditCard.Replace(s, "[CARD_REDACTED]");
+        s = PiiIp.Replace(s, "[IP_REDACTED]");
+        s = PiiEmployeeId.Replace(s, "[ID_REDACTED]");
+        s = PiiUserId.Replace(s, "[ID_REDACTED]");
+        return s;
     }
 }

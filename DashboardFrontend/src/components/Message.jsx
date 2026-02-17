@@ -12,16 +12,20 @@ const formatTime = (ts) => {
   }
 };
 
-const Message = ({ message, isActiveStep, onOptionSelect, onInputSubmit }) => {
+const Message = ({ message, isActiveStep, onOptionSelect, onInputSubmit, introIndex, showTimestamp }) => {
   const { text, sender, timestamp, stepData } = message;
   const messageClass = `message ${sender}`;
-  const displayName = sender === 'user' ? 'You' : sender === 'assistant' ? 'Gemini' : 'System';
+  const displayName = sender === 'user' ? 'You' : sender === 'assistant' ? 'CrateBot' : 'System';
   const timeStr = formatTime(timestamp);
   const showOptions = isActiveStep && stepData?.options?.length > 0;
   const showInput = isActiveStep && stepData && (!stepData.options || stepData.options.length === 0) && stepData.type !== 'complete' && stepData.type !== 'confirm';
 
   return (
-    <div className={messageClass}>
+    <div
+      className={`${messageClass}${showTimestamp ? ' show-timestamp' : ''}`}
+      style={typeof introIndex === 'number' ? { '--intro-index': introIndex } : undefined}
+      data-intro-index={typeof introIndex === 'number' ? introIndex : undefined}
+    >
       <div className="message-sender">
         {displayName}
         {timeStr && <span className="message-timestamp">{timeStr}</span>}

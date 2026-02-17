@@ -1,0 +1,13 @@
+---
+description: Task cards and breakdowns – always create in task-cards/ folder
+alwaysApply: false
+---
+
+# Rachel – Task Cards Location
+
+When creating new task card or task breakdown `.md` files:
+
+- **Always place them in:** `MonitoringAi/task-cards/`
+- **Examples:** `TASK_CARDS_*.md`, `TASK_BREAKDOWN_*.md`, or any new task-related document
+
+Do not create task card files in the project root. Use `task-cards/` as the single location for all team task documentation.

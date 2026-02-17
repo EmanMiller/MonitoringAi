@@ -13,9 +13,25 @@
 .main-content {
   display: flex;
   flex-grow: 1;
-  padding: var(--spacing-xl);
-  gap: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  gap: var(--spacing-lg);
   background: var(--gradient-primary);
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    padding: var(--spacing-xl);
+    gap: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-md);
+    flex-direction: column;
+  }
 }
 
 .main-content-area {
@@ -24,6 +40,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .spinner {
