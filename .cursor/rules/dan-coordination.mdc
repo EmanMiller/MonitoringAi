@@ -101,3 +101,35 @@ It respects `.dan-hold` (no push) and `.dan-approved` (allow push on `main`). Tr
 
 - Confirm with the repository link: https://github.com/EmanMiller/MonitoringAi
 - If push fails, alert: **❌ Push failed: [error message] - @Paul or @Becca please check**
+
+---
+
+## Completed tasks
+
+- Auth: password verification, JWT/cookies, `/me` fix (Gary)
+- Query/run endpoint (501), CORS 5174 (Gary)
+- Admin route, Sidebar link, AdminView.jsx (Niklaus)
+- Wizard success link clickable, Header → MonitoringAI (Niklaus)
+- JWT secret from env in prod (Paul)
+- Root `.env.example`, AGENTS.md, Becca rules, SETUP.md (Rachel, Dan)
+- Niklaus + Paul rule files
+- RACHEL follow-up release pushed (commit b050359)
+
+---
+
+## To-do tasks
+
+**High priority**
+- Common Q&A redesign (6 sections, minimal scroll)
+- Fix 503 on Create Dashboard (Confluence/Gemini config)
+- Landing chat: chat-driven dashboard creation flow
+- Simulate Chatbox: natural language → query matching
+
+**Medium priority**
+- UX simplification: single-view Common Q&A, remove Query Builder per spec
+- Final cleanup: Quick Query removal, layout (scrollable sidebar, centered chat), bot intro messages
+
+**Lower priority**
+- Vector DB design for Confluence search in Common Q&A
+- Confluence: configure ApiUrl, Username, ApiToken, PageId
+- Sumo Logic: wire real API for Query Builder Run (currently 501)
