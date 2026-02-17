@@ -19,12 +19,49 @@ namespace DashboardApi.Services
             _configuration = configuration;
         }
 
+        /// <summary>Verifies Sumo Logic credentials and returns connection status.</summary>
+        public async Task<(bool Connected, string Message, string? FolderId)> CheckSumoLogicConnectionAsync()
+        {
+            var apiUrl = _configuration["SumoLogic:ApiUrl"] ?? "https://api.sumologic.com";
+            var apiKey = _configuration["SumoLogic:ApiKey"];
+            var apiSecret = _configuration["SumoLogic:ApiSecret"];
+            var folderId = _configuration["SumoLogic:FolderId"];
+
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+                return (false, "Sumo Logic credentials not configured (SUMO_LOGIC_ACCESS_ID, SUMO_LOGIC_ACCESS_KEY).", null);
+
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{apiKey}:{apiSecret}")));
+
+            try
+            {
+                // Try v1/collectors (widely available) - v1/accounts/me may not exist on all deployments
+                var response = await _httpClient.GetAsync($"{apiUrl}/api/v1/collectors?limit=1");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    return (false, $"Sumo Logic auth failed: {response.StatusCode} - {body}", null);
+                }
+                var hasFolder = !string.IsNullOrEmpty(folderId);
+                return (true, hasFolder ? "Connected. FolderId configured." : "Connected. Set SUMO_LOGIC_FOLDER_ID for dashboard creation.", hasFolder ? folderId : null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Sumo Logic connection error: {ex.Message}", null);
+            }
+        }
+
         public async Task<string> CreateDashboardFromWizardAsync(DashboardWizardRequest request)
         {
-            var sumoLogicApiUrl = _configuration["SumoLogic:ApiUrl"];
+            var sumoLogicApiUrl = _configuration["SumoLogic:ApiUrl"] ?? "https://api.sumologic.com";
             var sumoLogicApiKey = _configuration["SumoLogic:ApiKey"];
             var sumoLogicApiSecret = _configuration["SumoLogic:ApiSecret"];
             var folderId = _configuration["SumoLogic:FolderId"];
+
+            if (string.IsNullOrEmpty(sumoLogicApiKey) || string.IsNullOrEmpty(sumoLogicApiSecret))
+                throw new InvalidOperationException("Sumo Logic credentials not configured. Set SUMO_LOGIC_ACCESS_ID and SUMO_LOGIC_ACCESS_KEY in .env.");
+            if (string.IsNullOrEmpty(folderId))
+                throw new InvalidOperationException("Sumo Logic folder not configured. Set SUMO_LOGIC_FOLDER_ID in .env. Get folder ID from Sumo Logic: Manage Data > Personal folder.");
 
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", 
                 System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{sumoLogicApiKey}:{sumoLogicApiSecret}")));
@@ -161,16 +198,28 @@ namespace DashboardApi.Services
             var json = JsonConvert.SerializeObject(dashboard, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{sumoLogicApiUrl}/v2/content/folders/{folderId}/import", content);
+            var response = await _httpClient.PostAsync($"{sumoLogicApiUrl}/api/v2/content/folders/{folderId}/import", content);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errBody = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException(
+                    response.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.Unauthorized => "Sumo Logic authentication failed. Check SUMO_LOGIC_ACCESS_ID and SUMO_LOGIC_ACCESS_KEY.",
+                        System.Net.HttpStatusCode.Forbidden => "Sumo Logic access denied. Ensure the account has 'Manage Content' capability.",
+                        System.Net.HttpStatusCode.NotFound => $"Sumo Logic folder not found. Check SUMO_LOGIC_FOLDER_ID. {errBody}",
+                        System.Net.HttpStatusCode.TooManyRequests => "Sumo Logic rate limit exceeded. Please try again later.",
+                        _ => $"Sumo Logic API error ({response.StatusCode}): {errBody}"
+                    });
+            }
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var createdDashboard = JsonConvert.DeserializeObject<dynamic>(responseContent);
             string? url = createdDashboard?.url?.ToString();
             if (string.IsNullOrEmpty(url) && createdDashboard?.id != null)
             {
-                var baseUrl = (sumoLogicApiUrl ?? "").Replace("/api", "");
+                var baseUrl = (sumoLogicApiUrl ?? "").Replace("api.", "service.").Replace("/api", "");
                 url = $"{baseUrl}/app/dashboards#dashboard/{createdDashboard.id}";
             }
             return url ?? throw new System.InvalidOperationException("Sumo Logic did not return a dashboard URL.");

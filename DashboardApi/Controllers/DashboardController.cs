@@ -31,6 +31,14 @@ namespace DashboardApi.Controllers
             _dashboardRateLimit = dashboardRateLimit;
         }
 
+        [HttpGet("sumo-status")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetSumoStatus()
+        {
+            var (connected, message, folderId) = await _dashboardService.CheckSumoLogicConnectionAsync();
+            return Ok(new { connected, message, folderId });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateDashboard([FromBody] DashboardCreationRequest request)
         {
@@ -88,14 +96,14 @@ namespace DashboardApi.Controllers
                 var dashboardUrl = await _dashboardService.CreateDashboardFromWizardAsync(wizardRequest);
 
                 var confluencePageId = _configuration["Confluence:PageId"];
-                if (string.IsNullOrEmpty(confluencePageId))
-                    return StatusCode(500, "Confluence PageId is not configured.");
+                if (!string.IsNullOrEmpty(confluencePageId))
+                {
+                    var projectName = "Project From Wizard";
+                    await _confluenceService.UpdatePageAsync(confluencePageId, dashboardUrl, dashboardTitle, projectName);
+                    _activityService.LogActivity("confluence_created", $"New Confluence page: '{dashboardTitle}'");
+                }
 
-                var projectName = "Project From Wizard";
-                await _confluenceService.UpdatePageAsync(confluencePageId, dashboardUrl, dashboardTitle, projectName);
-                _activityService.LogActivity("dashboard_update", $"Dashboard '{dashboardTitle}' updated");
-                _activityService.LogActivity("confluence_created", $"New Confluence page: '{dashboardTitle}'");
-
+                _activityService.LogActivity("dashboard_update", $"Dashboard '{dashboardTitle}' created");
                 return Ok(new { dashboardUrl });
             }
             catch (Exception ex)

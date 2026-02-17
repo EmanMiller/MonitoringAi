@@ -53,6 +53,15 @@ static void LoadEnvFile()
                     continue;
                 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
                     Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+                // Map Sumo Logic env vars to ASP.NET config (SumoLogic:ApiKey = AccessId, ApiSecret = AccessKey)
+                if (string.Equals(key, "SUMO_LOGIC_ACCESS_ID", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("SumoLogic__ApiKey", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "SUMO_LOGIC_ACCESS_KEY", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("SumoLogic__ApiSecret", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "SUMO_LOGIC_FOLDER_ID", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("SumoLogic__FolderId", value, EnvironmentVariableTarget.Process);
+                if (string.Equals(key, "SUMO_LOGIC_API_URL", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(value))
+                    Environment.SetEnvironmentVariable("SumoLogic__ApiUrl", value, EnvironmentVariableTarget.Process);
             }
         }
         break;

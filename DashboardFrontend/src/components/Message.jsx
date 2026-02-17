@@ -13,7 +13,7 @@ const formatTime = (ts) => {
 };
 
 const Message = ({ message, isActiveStep, onOptionSelect, onInputSubmit, introIndex, showTimestamp }) => {
-  const { text, sender, timestamp, stepData } = message;
+  const { text, sender, timestamp, stepData, dashboardUrl } = message;
   const messageClass = `message ${sender}`;
   const displayName = sender === 'user' ? 'You' : sender === 'assistant' ? 'CrateBot' : 'System';
   const timeStr = formatTime(timestamp);
@@ -32,6 +32,13 @@ const Message = ({ message, isActiveStep, onOptionSelect, onInputSubmit, introIn
       </div>
       <div className="message-content">
         {text && <p>{text}</p>}
+        {dashboardUrl && (
+          <p className="message-dashboard-link">
+            <a href={dashboardUrl} target="_blank" rel="noopener noreferrer" className="message-dashboard-link-a">
+              Open Dashboard in Sumo Logic →
+            </a>
+          </p>
+        )}
         {showOptions && (
           <ChatMessageOptions options={stepData.options} onSelect={onOptionSelect} />
         )}

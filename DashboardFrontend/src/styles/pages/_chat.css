@@ -166,6 +166,19 @@
   font-style: italic;
 }
 
+.message-dashboard-link { margin: var(--spacing-md) 0 0; }
+.message-dashboard-link-a {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--gradient-purple);
+  color: #fff;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: box-shadow var(--transition-normal);
+}
+.message-dashboard-link-a:hover { box-shadow: var(--glow-purple); }
+
 .chat-header {
   display: flex;
   justify-content: space-between;

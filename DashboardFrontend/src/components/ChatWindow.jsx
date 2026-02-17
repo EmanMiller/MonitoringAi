@@ -175,6 +175,7 @@ const ChatWindow = () => {
               text: `✅ Your dashboard has been created successfully.`,
               sender: 'assistant',
               timestamp: Date.now(),
+              dashboardUrl: result?.dashboardUrl,
             }]);
           } catch (e) {
             showToast('Dashboard creation failed. ' + (e?.response?.data?.message || e.message));

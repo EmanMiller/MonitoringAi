@@ -341,18 +341,34 @@ const WizardStep3 = ({ useDefaults, setUseDefaults, variables, setVariables }) =
   </div>
 );
 
-const ProcessingView = ({ status, dashboardUrl }) => (
-  <div className="processing-view">
-    <h3>{dashboardUrl ? 'Dashboard Ready' : 'AI Assistant at Work...'}</h3>
-    <p>{status}</p>
-    {dashboardUrl && (
-      <p>
-        <a href={dashboardUrl} target="_blank" rel="noopener noreferrer">View Dashboard</a>
-      </p>
-    )}
-    {!dashboardUrl && <div className="spinner"></div>}
-  </div>
-);
+const ProcessingView = ({ status, dashboardUrl }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (dashboardUrl) {
+      navigator.clipboard.writeText(dashboardUrl).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+  return (
+    <div className="processing-view">
+      <h3>{dashboardUrl ? 'Dashboard Ready' : 'AI Assistant at Work...'}</h3>
+      <p>{status}</p>
+      {dashboardUrl && (
+        <div className="processing-view-actions">
+          <a href={dashboardUrl} target="_blank" rel="noopener noreferrer" className="button-primary processing-view-open-btn">
+            Open Dashboard in Sumo Logic
+          </a>
+          <button type="button" onClick={handleCopy} className="button-secondary processing-view-copy-btn">
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
+        </div>
+      )}
+      {!dashboardUrl && <div className="spinner"></div>}
+    </div>
+  );
+};
 
 const initialDefaults = Object.fromEntries(
   RECOMMENDED_DEFAULTS.map((d) => [d.id, true])
