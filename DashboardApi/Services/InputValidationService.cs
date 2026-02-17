@@ -17,6 +17,7 @@ public static class InputValidationService
     private const int QueryKeyMaxLength = 200;
     private const int ChatMessageMaxLength = 2000;
     private const int SearchQueryMaxLength = 100;
+    private const int MatchQueryUserInputMaxLength = 500;
 
     public static (bool Valid, string? Error) ValidateDashboardName(string? name)
     {
@@ -79,6 +80,28 @@ public static class InputValidationService
         if (q == null) return (true, null);
         if (q.Length > SearchQueryMaxLength) return (false, $"Search query must be at most {SearchQueryMaxLength} characters.");
         return (true, null);
+    }
+
+    /// <summary>Validate user input for match-query endpoint (max 500 chars, no script tags).</summary>
+    public static (bool Valid, string? Error) ValidateMatchQueryInput(string? userInput)
+    {
+        if (string.IsNullOrWhiteSpace(userInput)) return (false, "userInput is required.");
+        if (userInput.Length > MatchQueryUserInputMaxLength)
+            return (false, $"userInput must be at most {MatchQueryUserInputMaxLength} characters.");
+        if (ContainsScriptTags(userInput)) return (false, "userInput contains invalid content.");
+        return (true, null);
+    }
+
+    /// <summary>Sanitize match-query user input (trim, strip scripts, cap length).</summary>
+    public static string SanitizeMatchQueryInput(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        var s = input;
+        foreach (var tag in DangerousScriptTags)
+            s = Regex.Replace(s, tag, "", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+        s = Regex.Replace(s, @"<[^>]*>", "", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        if (s.Length > MatchQueryUserInputMaxLength) s = s[..MatchQueryUserInputMaxLength];
+        return s.Trim();
     }
 
     /// <summary>Escape SQL-like wildcards for safe search: %, _, [, ].</summary>

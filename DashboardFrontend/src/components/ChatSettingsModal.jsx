@@ -25,7 +25,7 @@ const ChatSettingsModal = ({ isOpen, onClose, onConnectionChange, connectionStat
         setTestSuccess(true);
         onConnectionChange?.(true);
       } else {
-        setTestError('Chat is not configured or connection failed. Set Gemini:ApiKey on the server.');
+        setTestError('Chat is not configured or connection failed. Ask your administrator to set GEMINI_API_KEY or Gemini:ApiKey on the server.');
         onConnectionChange?.(false);
       }
     } catch (err) {
@@ -53,7 +53,7 @@ const ChatSettingsModal = ({ isOpen, onClose, onConnectionChange, connectionStat
             Chat is powered by the server. The Gemini API key is stored only on the backend and is never sent to the browser.
           </p>
           <p className="chat-settings-hint">
-            To enable chat, an administrator must set <code>Gemini:ApiKey</code> in the server configuration (e.g. appsettings or environment).
+            To enable chat, an administrator must set <code>GEMINI_API_KEY</code> or <code>Gemini:ApiKey</code> in the server configuration (.env or appsettings).
           </p>
           <div className="chat-settings-actions">
             <button

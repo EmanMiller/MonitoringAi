@@ -165,6 +165,15 @@ export const postDashboardFlow = async (message, history = [], flowContext = nul
 };
 
 /**
+ * NLP/semantic match: user natural language → most relevant query from mock library.
+ * Body: { userInput }. Returns { matched, matchedId?, category?, query?, explanation?, confidence?, message? }.
+ */
+export const matchQuery = async (userInput) => {
+  const { data } = await api.post('/api/Chat/match-query', { userInput });
+  return data;
+};
+
+/**
  * Query Builder AI: natural language → Sumo Logic query + explanation.
  * Body: { userInput, context? }. Returns { query, explanation, confidence }.
  */

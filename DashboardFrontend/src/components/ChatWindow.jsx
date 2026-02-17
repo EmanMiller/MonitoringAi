@@ -3,7 +3,7 @@ import Message from './Message';
 import ChatInput from './Chat/ChatInput';
 import ChatSettingsModal from './ChatSettingsModal';
 import Toast from './Toast';
-import { getChatStatus, postChat, postDashboardFlow, createDashboardFromWizard } from '../services/api';
+import { getChatStatus, postChat, postDashboardFlow, createDashboardFromWizard, matchQuery } from '../services/api';
 import { useDashboardFlow } from '../context/DashboardFlowContext';
 
 const NO_KEY_MESSAGE = 'Chat is not configured. Ask your administrator to set the Gemini API key on the server.';
@@ -118,6 +118,27 @@ const ChatWindow = () => {
       if (useDashboardFlow) {
         data = await postDashboardFlow(text.trim(), history, flowContext);
       } else {
+        // Simulate chatbox: try match-query first for natural language → pre-built query
+        const trimmed = text.trim();
+        if (trimmed.length >= 3) {
+          try {
+            const matchResult = await matchQuery(trimmed);
+            if (matchResult?.matched && matchResult?.query) {
+              const explanation = matchResult.explanation || `Matched: ${matchResult.category || 'query'}.`;
+              const replyText = `${explanation}\n\n\`\`\`\n${matchResult.query}\n\`\`\``;
+              setMessages((prev) => [...prev, { text: replyText, sender: 'assistant', timestamp: Date.now() }]);
+              setLoading(false);
+              return;
+            }
+            if (matchResult?.matched === false && matchResult?.message) {
+              setMessages((prev) => [...prev, { text: matchResult.message, sender: 'assistant', timestamp: Date.now() }]);
+              setLoading(false);
+              return;
+            }
+          } catch {
+            // Fall through to general chat
+          }
+        }
         data = await postChat(text.trim(), history);
       }
 

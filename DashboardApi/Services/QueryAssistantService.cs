@@ -25,8 +25,8 @@ public class QueryAssistantService
     {
         var apiKey = _configuration["GEMINI_API_KEY"] ?? _configuration["Gemini:ApiKey"];
         var trimmed = apiKey?.Trim();
-        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
+        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase) || string.Equals(trimmed, "EMAN_GOOGLE_API_KEY_HERE", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Gemini API key is not configured. Replace EMAN_GOOGLE_API_KEY_HERE with your key in .env or appsettings.");
         var model = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
 
         List<LogMapping> mappings;

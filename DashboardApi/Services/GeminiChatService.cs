@@ -24,7 +24,7 @@ public class GeminiChatService
         var apiKey = GetApiKey();
         var modelName = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
         if (string.IsNullOrEmpty(apiKey))
-            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
+            throw new InvalidOperationException("Gemini API key is not configured. Replace EMAN_GOOGLE_API_KEY_HERE with your Google Gemini API key in .env or appsettings.");
 
         var contents = new List<object>();
         foreach (var turn in history)
@@ -77,7 +77,7 @@ public class GeminiChatService
         var apiKey = GetApiKey();
         var modelName = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
         if (string.IsNullOrEmpty(apiKey))
-            throw new InvalidOperationException("Gemini API key is not configured. Set GEMINI_API_KEY or Gemini:ApiKey.");
+            throw new InvalidOperationException("Gemini API key is not configured. Replace EMAN_GOOGLE_API_KEY_HERE with your Google Gemini API key in .env or appsettings.");
 
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={apiKey}";
         var body = new
@@ -127,7 +127,7 @@ public class GeminiChatService
     {
         var key = _configuration["GEMINI_API_KEY"] ?? _configuration["Gemini:ApiKey"];
         var trimmed = key?.Trim();
-        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(trimmed) || string.Equals(trimmed, "placeholder", StringComparison.OrdinalIgnoreCase) || string.Equals(trimmed, "EMAN_GOOGLE_API_KEY_HERE", StringComparison.OrdinalIgnoreCase))
             return null;
         return trimmed;
     }

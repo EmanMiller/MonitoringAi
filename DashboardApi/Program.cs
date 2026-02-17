@@ -45,6 +45,10 @@ static void LoadEnvFile()
                 var value = match.Groups[2].Value.Trim();
                 if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
                     value = value[1..^1].Replace("\\\"", "\"");
+                // Don't let .env override with placeholder — so appsettings (e.g. real key) can be used
+                if (string.Equals(key, "GEMINI_API_KEY", StringComparison.OrdinalIgnoreCase) &&
+                    (string.IsNullOrEmpty(value) || value == "placeholder" || value == "EMAN_GOOGLE_API_KEY_HERE"))
+                    continue;
                 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
                     Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
             }

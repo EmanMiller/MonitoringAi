@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using DashboardApi.Data;
 using DashboardApi.Models;
 using DashboardApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +14,15 @@ public class ChatController : ControllerBase
     private readonly ChatRateLimitService _rateLimit;
     private readonly QueryAssistantAiService _queryAi;
     private readonly DashboardFlowService _dashboardFlow;
+    private readonly QueryMatchService _queryMatch;
 
-    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow)
+    public ChatController(GeminiChatService chatService, ChatRateLimitService rateLimit, QueryAssistantAiService queryAi, DashboardFlowService dashboardFlow, QueryMatchService queryMatch)
     {
         _chatService = chatService;
         _rateLimit = rateLimit;
         _queryAi = queryAi;
         _dashboardFlow = dashboardFlow;
+        _queryMatch = queryMatch;
     }
 
     /// <summary>
@@ -84,6 +87,38 @@ public class ChatController : ControllerBase
             list.Add(new ChatTurn { Sender = sender, Text = text });
         }
         return list;
+    }
+
+    /// <summary>
+    /// Match user natural language to a query from the mock library. Body: { userInput }. Rate limited.
+    /// </summary>
+    [HttpPost("match-query")]
+    public async Task<ActionResult<QueryMatchResult>> MatchQuery([FromBody] MatchQueryRequest request)
+    {
+        var (valid, error) = InputValidationService.ValidateMatchQueryInput(request?.UserInput);
+        if (!valid)
+            return BadRequest(new { details = error ?? "userInput is required." });
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+        var (allowed, retryAfter) = _rateLimit.TryConsume(userId);
+        if (!allowed)
+        {
+            Response.Headers.RetryAfter = retryAfter.ToString();
+            return StatusCode(429, new { details = "Too many requests. Please wait.", retryAfterSeconds = retryAfter });
+        }
+
+        var sanitized = InputValidationService.SanitizeMatchQueryInput(request!.UserInput);
+        var result = await _queryMatch.MatchQueryAsync(sanitized);
+        var safe = new QueryMatchResult
+        {
+            Matched = result.Matched,
+            Query = result.Query != null ? InputValidationService.SanitizeForDisplay(result.Query) : null,
+            Category = result.Category != null ? InputValidationService.SanitizeForDisplay(result.Category) : null,
+            Explanation = result.Explanation != null ? InputValidationService.SanitizeForDisplay(result.Explanation) : null,
+            Confidence = result.Confidence,
+            Message = result.Message != null ? InputValidationService.SanitizeForDisplay(result.Message) : null
+        };
+        return Ok(safe);
     }
 
     /// <summary>
@@ -250,6 +285,22 @@ public class ChatController : ControllerBase
             return StatusCode(503, new { error = ex.Message });
         }
     }
+}
+
+public class MatchQueryRequest
+{
+    public string? UserInput { get; set; }
+}
+
+public class MatchQueryResponse
+{
+    public bool Matched { get; set; }
+    public string? MatchedId { get; set; }
+    public string? Category { get; set; }
+    public string? Query { get; set; }
+    public string? Explanation { get; set; }
+    public string? Confidence { get; set; }
+    public string? Message { get; set; }
 }
 
 public class GenerateQueryRequest

@@ -62,6 +62,83 @@ public class QueryAssistantAiService
         };
     }
 
+    /// <summary>
+    /// NLP/semantic match: map user natural language to the most relevant query from the library. Handles paraphrasing; returns no-match when none fit.
+    /// </summary>
+    public async Task<MatchQueryResult> MatchQueryAsync(string userInput, IReadOnlyList<QueryLibraryEntryForMatch> library, CancellationToken cancellationToken = default)
+    {
+        if (library == null || library.Count == 0)
+            return new MatchQueryResult { Matched = false, Message = "No query library available." };
+        var system = BuildMatchQuerySystemPrompt(library);
+        var user = "User request: " + (userInput?.Trim() ?? "");
+        var raw = await _gemini.GenerateWithSystemAsync(system, user, cancellationToken);
+        return ParseMatchQueryResponse(raw, library);
+    }
+
+    private static string BuildMatchQuerySystemPrompt(IReadOnlyList<QueryLibraryEntryForMatch> library)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("You are a Sumo Logic query assistant. Given the user's natural language request, select the MOST relevant query from the library below. Handle paraphrasing (e.g. 'show me failed checkouts', 'email bounce rate').");
+        sb.AppendLine();
+        sb.AppendLine("--- QUERY LIBRARY (use only these) ---");
+        foreach (var e in library)
+            sb.AppendLine($"ID: {e.Id} | Category: {e.Category} | Name: {e.Name} | Description: {e.Description} | Query: {e.Query}");
+        sb.AppendLine("--- END LIBRARY ---");
+        sb.AppendLine();
+        sb.AppendLine("If one query clearly fits, respond with:");
+        sb.AppendLine("MATCHED_ID: <id from library>");
+        sb.AppendLine("QUERY: <full query string from library>");
+        sb.AppendLine("EXPLANATION: <1-2 sentences why this matches the user's request>");
+        sb.AppendLine("CONFIDENCE: high|medium|low");
+        sb.AppendLine();
+        sb.AppendLine("If NONE of the queries fit the user's request, respond with:");
+        sb.AppendLine("MATCHED: false");
+        sb.AppendLine("MESSAGE: <short helpful suggestion, e.g. what they could ask instead>");
+        sb.AppendLine();
+        sb.AppendLine("Use only the exact IDs and Query strings from the library. Return exactly one of the two formats above.");
+        return sb.ToString();
+    }
+
+    private static MatchQueryResult ParseMatchQueryResponse(string raw, IReadOnlyList<QueryLibraryEntryForMatch> library)
+    {
+        var noMatch = Regex.IsMatch(raw ?? "", @"MATCHED:\s*false", RegexOptions.IgnoreCase);
+        if (noMatch)
+        {
+            var msgMatch = Regex.Match(raw ?? "", @"MESSAGE:\s*(.+)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            var message = msgMatch.Success ? msgMatch.Groups[1].Value.Trim() : "No matching query found. Try describing what you need (e.g. logins, checkouts, email, slow requests).";
+            return new MatchQueryResult { Matched = false, Message = message };
+        }
+
+        var idMatch = Regex.Match(raw ?? "", @"MATCHED_ID:\s*(\S+)", RegexOptions.IgnoreCase);
+        var id = idMatch.Success ? idMatch.Groups[1].Value.Trim() : "";
+        var entry = library.FirstOrDefault(e => string.Equals(e.Id, id, StringComparison.OrdinalIgnoreCase));
+
+        var queryMatch = Regex.Match(raw ?? "", @"QUERY:\s*(.+?)(?=EXPLANATION:|CONFIDENCE:|$)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        var query = queryMatch.Success ? queryMatch.Groups[1].Value.Trim() : (entry?.Query ?? "");
+        if (string.IsNullOrWhiteSpace(query) && entry != null)
+            query = entry.Query;
+
+        var explMatch = Regex.Match(raw ?? "", @"EXPLANATION:\s*(.+?)(?=CONFIDENCE:|$)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        var explanation = explMatch.Success ? explMatch.Groups[1].Value.Trim() : "";
+
+        var confMatch = Regex.Match(raw ?? "", @"CONFIDENCE:\s*(high|medium|low)", RegexOptions.IgnoreCase);
+        var confidence = confMatch.Success ? confMatch.Groups[1].Value.ToLowerInvariant() : "medium";
+
+        if (entry == null && !string.IsNullOrWhiteSpace(id))
+            entry = library.FirstOrDefault(e => raw?.Contains(e.Query, StringComparison.Ordinal) == true);
+
+        return new MatchQueryResult
+        {
+            Matched = entry != null || !string.IsNullOrWhiteSpace(query),
+            MatchedId = entry?.Id ?? id,
+            Category = entry?.Category ?? "",
+            Query = query,
+            Explanation = explanation,
+            Confidence = confidence,
+            Message = null
+        };
+    }
+
     private static string BuildGenerateQuerySystemPrompt()
     {
         return """
@@ -216,4 +293,24 @@ public class ExplainQueryResult
 {
     public string Explanation { get; set; } = "";
     public string Confidence { get; set; } = "high";
+}
+
+public class QueryLibraryEntryForMatch
+{
+    public string Id { get; set; } = "";
+    public string Category { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string Query { get; set; } = "";
+}
+
+public class MatchQueryResult
+{
+    public bool Matched { get; set; }
+    public string? MatchedId { get; set; }
+    public string Category { get; set; } = "";
+    public string Query { get; set; } = "";
+    public string Explanation { get; set; } = "";
+    public string Confidence { get; set; } = "medium";
+    public string? Message { get; set; }
 }

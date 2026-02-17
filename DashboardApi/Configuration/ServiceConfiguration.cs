@@ -28,6 +28,7 @@ public static class ServiceConfiguration
         services.AddSingleton<DashboardRateLimitService>();
         services.AddScoped<QueryAssistantAiService>();
         services.AddScoped<DashboardFlowService>();
+        services.AddScoped<QueryMatchService>();
 
         return services;
     }
