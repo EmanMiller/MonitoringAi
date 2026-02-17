@@ -10,12 +10,19 @@ node_modules/
 .dan-hold
 .dan-approved
 
+# Cursor rules (local AI guidance, not committed)
+.cursor/
+
+# Dan watcher (local automation, not committed)
+dan-watcher.js
+
 # Dan watcher runs from repo root; keep existing ignores in subprojects
 # (DashboardFrontend and DashboardApi have their own .gitignore)
 
 # QA, task breakdowns, and review docs (local/coordination only)
 QA_REPORT.md
 QA_SIGN_OFF_REPORT.md
+A_SIGN_OFF_REPORT.md
 RACHEL_REVIEW.md
 COMPLETED_TASKS.md
 task-cards/
